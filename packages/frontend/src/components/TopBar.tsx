@@ -56,11 +56,11 @@ export default function TopBar({ activePage, darkMode, onToggleDark, onNavigate,
     if (activePage === 'dashboard') {
       onNavigate('tasks')
       window.setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('myweight:new', { detail: { page: 'tasks' } }))
+        window.dispatchEvent(new CustomEvent('mylife:new', { detail: { page: 'tasks' } }))
       }, 0)
       return
     }
-    window.dispatchEvent(new CustomEvent('myweight:new', { detail: { page: activePage } }))
+    window.dispatchEvent(new CustomEvent('mylife:new', { detail: { page: activePage } }))
   }
 
   return (

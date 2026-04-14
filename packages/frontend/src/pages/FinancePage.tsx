@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Plus, TrendingDown, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { financeApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
-import type { TransactionType } from '@myweight/shared'
+import type { TransactionType } from '@mylife/shared'
 
 interface PageProps { darkMode: boolean }
 
@@ -31,8 +31,8 @@ export default function FinancePage({ darkMode }: PageProps) {
 
   useEffect(() => {
     const handleGlobalNew = () => startCreate('expense')
-    window.addEventListener('myweight:new', handleGlobalNew)
-    return () => window.removeEventListener('myweight:new', handleGlobalNew)
+    window.addEventListener('mylife:new', handleGlobalNew)
+    return () => window.removeEventListener('mylife:new', handleGlobalNew)
   }, [])
 
   const startCreate = (nextType: TransactionType) => {

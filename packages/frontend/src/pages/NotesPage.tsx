@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Plus, Search, FolderOpen, Trash2 } from 'lucide-react'
-import type { Notebook, NoteIndex, Note } from '@myweight/shared'
+import type { Notebook, NoteIndex, Note } from '@mylife/shared'
 import { notesApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
 
@@ -128,8 +128,8 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
 
   useEffect(() => {
     const handleGlobalNew = () => { void handleNewNote() }
-    window.addEventListener('myweight:new', handleGlobalNew)
-    return () => window.removeEventListener('myweight:new', handleGlobalNew)
+    window.addEventListener('mylife:new', handleGlobalNew)
+    return () => window.removeEventListener('mylife:new', handleGlobalNew)
   }, [activeNotebook, notebooks])
 
   return (

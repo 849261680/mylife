@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import db from '../db/client'
-import type { Notebook, NoteIndex, Note } from '@myweight/shared'
+import type { Notebook, NoteIndex, Note } from '@mylife/shared'
 
 const app = new Hono()
 

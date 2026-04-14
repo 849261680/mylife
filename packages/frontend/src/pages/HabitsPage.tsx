@@ -27,8 +27,8 @@ export default function HabitsPage({ darkMode }: PageProps) {
 
   useEffect(() => {
     const handleGlobalNew = () => setIsCreating(true)
-    window.addEventListener('myweight:new', handleGlobalNew)
-    return () => window.removeEventListener('myweight:new', handleGlobalNew)
+    window.addEventListener('mylife:new', handleGlobalNew)
+    return () => window.removeEventListener('mylife:new', handleGlobalNew)
   }, [])
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {

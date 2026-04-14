@@ -3,7 +3,7 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import db from '../db/client'
-import type { Project } from '@myweight/shared'
+import type { Project } from '@mylife/shared'
 
 const app = new Hono()
 

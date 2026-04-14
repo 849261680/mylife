@@ -8,7 +8,7 @@ import type {
   Transaction, CreateTransactionInput, MonthlySummary,
   CalendarEvent, CreateEventInput,
   Notebook, NoteIndex, Note, CreateNoteInput, UpdateNoteInput,
-} from '@myweight/shared'
+} from '@mylife/shared'
 
 const BASE = 'http://localhost:3004'
 

@@ -6,7 +6,7 @@ import { useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { tasksApi, notesApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
-import type { TaskSubtask } from '@myweight/shared'
+import type { TaskSubtask } from '@mylife/shared'
 
 type Priority = 'high' | 'medium' | 'low'
 type SendStatus = 'idle' | 'sending' | 'sent' | 'error'

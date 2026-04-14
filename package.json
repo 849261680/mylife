@@ -1,9 +1,9 @@
 {
-  "name": "myweight",
+  "name": "mylife",
   "private": true,
   "scripts": {
     "dev": "pnpm --parallel --filter './packages/*' dev",
-    "build": "pnpm --filter '@myweight/shared' build && pnpm --parallel --filter './packages/*' build",
+    "build": "pnpm --filter '@mylife/shared' build && pnpm --parallel --filter './packages/*' build",
     "typecheck": "pnpm --parallel --filter './packages/*' typecheck"
   },
   "devDependencies": {

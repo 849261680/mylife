@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { CheckCircle2, Circle, Plus, Clock, FolderOpen, Filter, LayoutGrid, List, Trash2, type LucideIcon } from 'lucide-react'
-import type { Task } from '@myweight/shared'
+import type { Task } from '@mylife/shared'
 import { projectsApi, tasksApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
 
@@ -56,8 +56,8 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
 
   useEffect(() => {
     const handleGlobalNew = () => startNewTask()
-    window.addEventListener('myweight:new', handleGlobalNew)
-    return () => window.removeEventListener('myweight:new', handleGlobalNew)
+    window.addEventListener('mylife:new', handleGlobalNew)
+    return () => window.removeEventListener('mylife:new', handleGlobalNew)
   }, [])
 
   useEffect(() => {

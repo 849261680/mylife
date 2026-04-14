@@ -97,8 +97,8 @@ export default function HealthPage({ darkMode }: PageProps) {
 
   useEffect(() => {
     const handleGlobalNew = () => setRecordingType('weight')
-    window.addEventListener('myweight:new', handleGlobalNew)
-    return () => window.removeEventListener('myweight:new', handleGlobalNew)
+    window.addEventListener('mylife:new', handleGlobalNew)
+    return () => window.removeEventListener('mylife:new', handleGlobalNew)
   }, [])
 
   const handleCreate = async (event: FormEvent<HTMLFormElement>) => {

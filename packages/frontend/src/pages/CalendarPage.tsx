@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import type { Task } from '@myweight/shared'
+import type { Task } from '@mylife/shared'
 import { tasksApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
 

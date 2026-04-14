@@ -1,5 +1,5 @@
 {
-  "name": "@myweight/backend",
+  "name": "@mylife/backend",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
   "dependencies": {
     "@hono/node-server": "^1.14.3",
     "@hono/zod-validator": "^0.7.6",
-    "@myweight/shared": "workspace:*",
+    "@mylife/shared": "workspace:*",
     "better-sqlite3": "^11.10.0",
     "hono": "^4.7.11",
     "nanoid": "^5.1.5",

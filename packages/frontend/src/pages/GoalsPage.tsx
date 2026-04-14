@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { CheckCircle2, Circle, Plus, Trash2 } from 'lucide-react'
-import type { Goal } from '@myweight/shared'
+import type { Goal } from '@mylife/shared'
 import { goalsApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
 
@@ -28,8 +28,8 @@ export default function GoalsPage({ darkMode }: PageProps) {
 
   useEffect(() => {
     const handleGlobalNew = () => setIsCreating(true)
-    window.addEventListener('myweight:new', handleGlobalNew)
-    return () => window.removeEventListener('myweight:new', handleGlobalNew)
+    window.addEventListener('mylife:new', handleGlobalNew)
+    return () => window.removeEventListener('mylife:new', handleGlobalNew)
   }, [])
 
   const startCreate = (type: Goal['goal_type']) => {
