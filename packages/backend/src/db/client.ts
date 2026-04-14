@@ -20,6 +20,7 @@ const ensureColumn = (table: string, column: string, ddl: string) => {
 
 ensureColumn('goals', 'goal_type', "goal_type TEXT NOT NULL DEFAULT 'long' CHECK(goal_type IN ('short','long'))")
 ensureColumn('tasks', 'done_at', 'done_at TEXT')
+ensureColumn('task_subtasks', 'priority', "priority TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','low'))")
 
 // 初始化表结构
 db.exec(SCHEMA_SQL)

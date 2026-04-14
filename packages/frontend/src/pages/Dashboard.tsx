@@ -1,14 +1,15 @@
 import {
   CheckCircle2, Circle, Clock, Plus,
-  ArrowRight, type LucideIcon,
+  ArrowRight, X, type LucideIcon,
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useRef, useState } from 'react'
 import type { FormEvent, ReactNode } from 'react'
 import { tasksApi, notesApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
 import type { TaskSubtask } from '@mylife/shared'
 
-type Priority = 'high' | 'medium' | 'low'
+type Priority = 'high' | 'low'
 type SendStatus = 'idle' | 'sending' | 'sent' | 'error'
 
 interface CardProps { children: ReactNode; className?: string; darkMode: boolean }
@@ -45,10 +46,9 @@ function Skeleton({ darkMode, className = '' }: { darkMode: boolean; className?:
   return <div className={`rounded animate-pulse ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} ${className}`} />
 }
 
-const priorityColor: Record<Priority, string> = {
-  high: 'bg-red-100 text-red-600', medium: 'bg-amber-100 text-amber-600', low: 'bg-gray-100 text-gray-500',
+const priorityDot: Record<string, string> = {
+  high: 'bg-red-400', medium: 'bg-blue-300', low: 'bg-blue-300',
 }
-const priorityLabel: Record<Priority, string> = { high: '高', medium: '中', low: '低' }
 
 interface PageProps {
   darkMode: boolean
@@ -76,7 +76,14 @@ export default function Dashboard({ darkMode, onNavigate }: PageProps) {
   const { data: tasks, loading: tasksLoading, refetch: refetchTasks } = useApi(() => tasksApi.list())
   const { data: subtasks, refetch: refetchSubtasks } = useApi(() => tasksApi.subtasks())
 
-  const todayTasks = tasks?.filter(t => t.due_date === today || t.status === 'todo') ?? []
+  const todayTasks = (tasks?.filter(t => t.due_date === today || t.status === 'todo') ?? [])
+    .sort((a, b) => {
+      if (a.status === 'done' && b.status !== 'done') return 1
+      if (a.status !== 'done' && b.status === 'done') return -1
+      if (a.priority === 'high' && b.priority !== 'high') return -1
+      if (a.priority !== 'high' && b.priority === 'high') return 1
+      return 0
+    })
   const doneTasks = todayTasks.filter(t => t.status === 'done').length
   const subtasksByTask = (subtasks ?? []).reduce<Record<string, TaskSubtask[]>>((acc, subtask) => {
     if (!acc[subtask.task_id]) acc[subtask.task_id] = []
@@ -86,6 +93,12 @@ export default function Dashboard({ darkMode, onNavigate }: PageProps) {
 
   const toggleTask = async (id: string, done: boolean) => {
     await tasksApi.update(id, { status: done ? 'todo' : 'done' })
+    refetchTasks()
+  }
+
+  const togglePriority = async (id: string, current: string) => {
+    const next = current === 'high' ? 'low' : 'high'
+    await tasksApi.update(id, { priority: next })
     refetchTasks()
   }
 
@@ -132,6 +145,11 @@ export default function Dashboard({ darkMode, onNavigate }: PageProps) {
 
   const toggleSubtask = async (subtask: TaskSubtask) => {
     await tasksApi.updateSubtask(subtask.id, { done: !subtask.done })
+    refetchSubtasks()
+  }
+
+  const toggleSubtaskPriority = async (subtask: TaskSubtask) => {
+    await tasksApi.updateSubtask(subtask.id, { priority: subtask.priority === 'high' ? 'low' : 'high' })
     refetchSubtasks()
   }
 
@@ -222,56 +240,96 @@ export default function Dashboard({ darkMode, onNavigate }: PageProps) {
           ) : todayTasks.length === 0 ? (
             <div className={`text-center py-8 text-sm ${subText}`}>今天没有任务 🎉</div>
           ) : (
-            <div className={`space-y-0 divide-y ${divider}`}>
+            <div className="space-y-0">
+              <AnimatePresence initial={false}>
               {todayTasks.slice(0, 4).map(task => (
-                <div key={task.id} className="py-2.5">
-                  <div className="flex items-start gap-3">
-                    <button onClick={() => toggleTask(task.id, task.status === 'done')} className="mt-0.5 flex-shrink-0">
+                <motion.div
+                  key={task.id}
+                  layout
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="py-2.5"
+                >
+                  <div className="group flex items-start gap-3">
+                    <button onClick={() => toggleTask(task.id, task.status === 'done')} className="mt-0.5 flex-shrink-0 cursor-pointer">
                       {task.status === 'done'
                         ? <CheckCircle2 size={16} className="text-indigo-500" />
                         : <Circle size={16} className={subText} />
                       }
                     </button>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm leading-snug ${task.status === 'done' ? `line-through ${subText}` : textH}`}>
-                        {task.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        {task.due_time && (
-                          <>
-                            <Clock size={11} className={subText} />
-                            <span className={`text-xs ${subText}`}>{task.due_time}</span>
-                          </>
+                      <div className="flex items-center gap-1.5">
+                        <p className={`text-sm leading-snug ${task.status === 'done' ? `line-through ${subText}` : textH}`}>
+                          {task.title}
+                        </p>
+                        {task.status !== 'done' && (
+                          <button
+                            onClick={() => togglePriority(task.id, task.priority)}
+                            title={task.priority === 'high' ? '高优先级，点击切换' : '低优先级，点击切换'}
+                            className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors ${priorityDot[task.priority] ?? 'bg-gray-300'}`}
+                          />
                         )}
-                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                          task.status === 'done'
-                            ? 'bg-gray-100 text-gray-400'
-                            : darkMode ? 'bg-gray-800 text-gray-400' : priorityColor[task.priority as Priority]
-                        }`}>
-                          {priorityLabel[task.priority as Priority]}
-                        </span>
                         <button
                           onClick={() => { setCreatingSubtaskFor(task.id); setSubtaskError(null); setNewSubtaskTitle('') }}
-                          className="text-xs text-indigo-500 hover:text-indigo-600"
+                          className={`text-indigo-400 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity`}
                         >
-                          添加子任务
+                          <Plus size={14} />
+                        </button>
+                        <button
+                          onClick={async () => { await tasksApi.remove(task.id); refetchTasks() }}
+                          className={`opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-400'}`}
+                        >
+                          <X size={14} />
                         </button>
                       </div>
+                      {task.due_time && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Clock size={11} className={subText} />
+                          <span className={`text-xs ${subText}`}>{task.due_time}</span>
+                        </div>
+                      )}
                       {(subtasksByTask[task.id] ?? []).length > 0 && (
                         <div className="mt-2 space-y-1">
-                          {(subtasksByTask[task.id] ?? []).map(subtask => (
-                            <button
+                          <AnimatePresence initial={false}>
+                          {[...(subtasksByTask[task.id] ?? [])].sort((a, b) => {
+                            if (!a.done && b.done) return -1
+                            if (a.done && !b.done) return 1
+                            if (a.priority === 'high' && b.priority !== 'high') return -1
+                            if (a.priority !== 'high' && b.priority === 'high') return 1
+                            return 0
+                          }).map(subtask => (
+                            <motion.div
                               key={subtask.id}
-                              onClick={() => toggleSubtask(subtask)}
-                              className={`flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left text-xs ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
+                              layout
+                              transition={{ duration: 0.25, ease: 'easeInOut' }}
+                              className={`group flex w-full items-center gap-2 rounded-lg px-2 py-1 text-xs ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
                             >
-                              {subtask.done
-                                ? <CheckCircle2 size={13} className="text-indigo-500" />
-                                : <Circle size={13} className={subText} />
-                              }
-                              <span className={subtask.done ? `line-through ${subText}` : textH}>{subtask.title}</span>
-                            </button>
+                              <button
+                                onClick={() => toggleSubtask(subtask)}
+                                className="flex-shrink-0"
+                              >
+                                {subtask.done
+                                  ? <CheckCircle2 size={13} className="text-indigo-500" />
+                                  : <Circle size={13} className={subText} />
+                                }
+                              </button>
+                              <div className="flex flex-1 items-center gap-1.5">
+                                <span className={subtask.done ? `line-through ${subText} text-xs` : `${textH} text-xs`}>{subtask.title}</span>
+                                {!subtask.done && (
+                                  <button
+                                    onClick={() => toggleSubtaskPriority(subtask)}
+                                    className={`w-2 h-2 rounded-full flex-shrink-0 transition-colors ${priorityDot[subtask.priority] ?? 'bg-gray-300'}`}
+                                  />
+                                )}
+                                <button
+                                  onClick={async () => { await tasksApi.removeSubtask(subtask.id); refetchSubtasks() }}
+                                  className={`opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-400'}`}
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            </motion.div>
                           ))}
+                          </AnimatePresence>
                         </div>
                       )}
                       {creatingSubtaskFor === task.id && (
@@ -292,8 +350,9 @@ export default function Dashboard({ darkMode, onNavigate }: PageProps) {
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               ))}
+              </AnimatePresence>
             </div>
           )}
           {!tasksLoading && todayTasks.length > 0 && (

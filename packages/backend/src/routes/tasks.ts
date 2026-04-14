@@ -18,11 +18,13 @@ const createTaskSchema = z.object({
 
 const createSubtaskSchema = z.object({
   title: z.string().min(1),
+  priority: z.enum(['high', 'low']).default('low'),
 })
 
 const updateSubtaskSchema = z.object({
   title: z.string().min(1).optional(),
   done: z.boolean().optional(),
+  priority: z.enum(['high', 'low']).optional(),
 })
 
 function parseSubtask(row: TaskSubtask & { done: number | boolean }): TaskSubtask {
@@ -95,14 +97,15 @@ app.post('/:id/subtasks', zValidator('json', createSubtaskSchema), (c) => {
     task_id: id,
     title: input.title,
     done: false,
+    priority: input.priority,
     created_at: now,
     updated_at: now,
   }
 
   db.prepare(`
-    INSERT INTO task_subtasks (id, task_id, title, done, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(subtask.id, subtask.task_id, subtask.title, 0, subtask.created_at, subtask.updated_at)
+    INSERT INTO task_subtasks (id, task_id, title, done, priority, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(subtask.id, subtask.task_id, subtask.title, 0, subtask.priority, subtask.created_at, subtask.updated_at)
 
   return c.json(subtask, 201)
 })

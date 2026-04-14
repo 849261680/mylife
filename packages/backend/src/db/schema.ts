@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS task_subtasks (
   task_id     TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
   title       TEXT NOT NULL,
   done        INTEGER NOT NULL DEFAULT 0,
+  priority    TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','low')),
   created_at  TEXT NOT NULL,
   updated_at  TEXT NOT NULL
 );

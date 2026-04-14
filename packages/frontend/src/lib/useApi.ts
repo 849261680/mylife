@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 interface ApiState<T> {
   data: T | null
@@ -12,15 +12,16 @@ export function useApi<T>(fetcher: () => Promise<T>, deps: unknown[] = []): ApiS
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
+  const hasData = useRef(false)
 
   const refetch = useCallback(() => setTick(t => t + 1), [])
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
+    if (!hasData.current) setLoading(true)
     setError(null)
     fetcher()
-      .then(d => { if (!cancelled) { setData(d); setLoading(false) } })
+      .then(d => { if (!cancelled) { hasData.current = true; setData(d); setLoading(false) } })
       .catch(e => { if (!cancelled) { setError(String(e)); setLoading(false) } })
     return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps

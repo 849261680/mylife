@@ -28,6 +28,7 @@ export interface TaskSubtask {
   task_id: string
   title: string
   done: boolean
+  priority: 'high' | 'low'
   created_at: string
   updated_at: string
 }
@@ -41,4 +42,4 @@ export type UpdateTaskInput = Partial<CreateTaskInput> & {
 }
 
 export type CreateTaskSubtaskInput = Pick<TaskSubtask, 'title'>
-export type UpdateTaskSubtaskInput = Partial<Pick<TaskSubtask, 'title' | 'done'>>
+export type UpdateTaskSubtaskInput = Partial<Pick<TaskSubtask, 'title' | 'done' | 'priority'>>
