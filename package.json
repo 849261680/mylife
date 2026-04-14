@@ -1,0 +1,12 @@
+{
+  "name": "myweight",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter './packages/*' dev",
+    "build": "pnpm --filter '@myweight/shared' build && pnpm --parallel --filter './packages/*' build",
+    "typecheck": "pnpm --parallel --filter './packages/*' typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
