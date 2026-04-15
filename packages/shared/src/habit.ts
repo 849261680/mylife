@@ -21,12 +21,18 @@ export interface HabitLog {
   created_at: string
 }
 
+export interface HabitHeatmapCell {
+  date: string
+  done: boolean
+}
+
 // 前端展示用的聚合类型
 export interface HabitWithStats extends Habit {
   streak: number          // 当前连续打卡天数
   total_this_month: number
   week_data: boolean[]    // 本周7天打卡情况
   today_done: boolean
+  heatmap: HabitHeatmapCell[]
 }
 
 export type CreateHabitInput = Omit<Habit, 'id' | 'archived' | 'created_at'>

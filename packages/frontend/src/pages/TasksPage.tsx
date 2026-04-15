@@ -4,15 +4,14 @@ import type { Task } from '@mylife/shared'
 import { projectsApi, tasksApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
 
-type Priority = 'high' | 'medium' | 'low'
+type Priority = 'high' | 'low'
 type ViewMode = 'list' | 'grid'
 type StatusFilter = 'all' | 'todo' | 'in_progress' | 'done'
 
 interface PriorityConfig { label: string; dot: string }
 const priorityConfig: Record<Priority, PriorityConfig> = {
   high:   { label: '高', dot: 'bg-red-400' },
-  medium: { label: '中', dot: 'bg-amber-400' },
-  low:    { label: '低', dot: 'bg-gray-300' },
+  low:    { label: '低', dot: 'bg-blue-400' },
 }
 
 interface PageProps {
@@ -113,7 +112,7 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
       setCreateError(null)
       await tasksApi.create({
         title,
-        priority: 'medium',
+        priority: 'low',
         due_date: null,
         due_time: null,
         tags: [],
@@ -306,7 +305,7 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
                 还没有任务，点击「新建任务」开始吧
               </div>
             ) : filtered.map(task => {
-              const pc = priorityConfig[task.priority as Priority] ?? priorityConfig.medium
+              const pc = priorityConfig[task.priority as Priority] ?? priorityConfig.low
               return (
                 <div key={task.id} className={`flex items-center gap-4 px-4 py-3 transition-colors ${hoverBg} ${viewMode === 'grid' ? `rounded-lg border ${darkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-100 bg-white'}` : 'first:rounded-t-xl last:rounded-b-xl'}`}>
                   <button className="flex-shrink-0" onClick={() => toggleDone(task)}>

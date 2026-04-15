@@ -21,8 +21,16 @@ const ensureColumn = (table: string, column: string, ddl: string) => {
 ensureColumn('goals', 'goal_type', "goal_type TEXT NOT NULL DEFAULT 'long' CHECK(goal_type IN ('short','long'))")
 ensureColumn('tasks', 'done_at', 'done_at TEXT')
 ensureColumn('task_subtasks', 'priority', "priority TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','low'))")
+ensureColumn('health_records', 'breakfast', 'breakfast TEXT')
+ensureColumn('health_records', 'lunch', 'lunch TEXT')
+ensureColumn('health_records', 'dinner', 'dinner TEXT')
+ensureColumn('agent_messages', 'trace_id', 'trace_id TEXT')
+ensureColumn('agent_actions', 'trace_id', 'trace_id TEXT')
+ensureColumn('agent_actions', 'error', 'error TEXT')
 
 // 初始化表结构
 db.exec(SCHEMA_SQL)
+
+db.prepare(`UPDATE tasks SET priority = 'low' WHERE priority NOT IN ('high', 'low')`).run()
 
 export default db

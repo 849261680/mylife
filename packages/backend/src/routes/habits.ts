@@ -3,9 +3,10 @@ import { zValidator } from '@hono/zod-validator'
 import { z } from 'zod'
 import { nanoid } from 'nanoid'
 import db from '../db/client'
-import type { Habit, HabitLog, HabitWithStats } from '@mylife/shared'
+import type { Habit, HabitHeatmapCell, HabitLog, HabitWithStats } from '@mylife/shared'
 
 const app = new Hono()
+const HEATMAP_DAYS = 7 * 18
 
 const createHabitSchema = z.object({
   name: z.string().min(1),
@@ -30,15 +31,27 @@ app.get('/', (c) => {
     weekDates.push(dd.toISOString().slice(0, 10))
   }
 
-  const result: HabitWithStats[] = habits.map(habit => {
-    // 本周打卡情况
-    const logs = db.prepare(`
-      SELECT date, done FROM habit_logs
-      WHERE habit_id = ? AND date IN (${weekDates.map(() => '?').join(',')})
-    `).all(habit.id, ...weekDates) as Pick<HabitLog, 'date' | 'done'>[]
+  const heatmapDates: string[] = []
+  for (let i = HEATMAP_DAYS - 1; i >= 0; i--) {
+    const dd = new Date(d)
+    dd.setDate(d.getDate() - i)
+    heatmapDates.push(dd.toISOString().slice(0, 10))
+  }
 
-    const logMap = new Map(logs.map(l => [l.date, l.done]))
-    const week_data = weekDates.map(date => logMap.get(date) ?? false)
+  const result: HabitWithStats[] = habits.map(habit => {
+    const recentLogs = db.prepare(`
+      SELECT date, done FROM habit_logs
+      WHERE habit_id = ? AND date >= ?
+    `).all(habit.id, heatmapDates[0]) as Pick<HabitLog, 'date' | 'done'>[]
+
+    const recentLogMap = new Map(recentLogs.map(log => [log.date, Boolean(log.done)]))
+
+    // 本周打卡情况
+    const week_data = weekDates.map(date => recentLogMap.get(date) ?? false)
+    const heatmap: HabitHeatmapCell[] = heatmapDates.map(date => ({
+      date,
+      done: recentLogMap.get(date) ?? false,
+    }))
 
     // 连续打卡天数
     let streak = 0
@@ -64,7 +77,8 @@ app.get('/', (c) => {
       streak,
       total_this_month: total,
       week_data,
-      today_done: logMap.get(today) ?? false,
+      today_done: recentLogMap.get(today) ?? false,
+      heatmap,
     }
   })
 

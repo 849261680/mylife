@@ -10,9 +10,10 @@ import FinancePage from './pages/FinancePage'
 import HealthPage from './pages/HealthPage'
 import NotesPage from './pages/NotesPage'
 import GoalsPage from './pages/GoalsPage'
+import AgentPage from './pages/AgentPage'
 import './index.css'
 
-export type PageId = 'dashboard' | 'goals' | 'tasks' | 'calendar' | 'habits' | 'finance' | 'health' | 'notes'
+export type PageId = 'dashboard' | 'goals' | 'tasks' | 'calendar' | 'habits' | 'finance' | 'health' | 'notes' | 'agent'
 
 interface PageProps {
   darkMode: boolean
@@ -29,6 +30,7 @@ const pages: Record<PageId, ComponentType<PageProps>> = {
   finance: FinancePage,
   health: HealthPage,
   notes: NotesPage,
+  agent: AgentPage,
 }
 
 export default function App() {

@@ -1,4 +1,4 @@
-export type Priority = 'high' | 'medium' | 'low'
+export type Priority = 'high' | 'low'
 export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'cancelled'
 
 export interface Project {
