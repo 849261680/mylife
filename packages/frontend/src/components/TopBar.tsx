@@ -11,6 +11,7 @@ const pageNames: Record<PageId, string> = {
   finance: '记账',
   health: '健康',
   notes: '笔记',
+  agent: 'Agent',
 }
 
 const greetings = (): string => {

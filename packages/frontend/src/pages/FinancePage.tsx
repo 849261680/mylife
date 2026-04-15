@@ -204,7 +204,9 @@ export default function FinancePage({ darkMode }: PageProps) {
                     <div className={`text-sm font-medium ${textH}`}>{t.note || t.category}</div>
                     <div className={`text-xs ${subText}`}>{t.category} · {t.date}</div>
                   </div>
-                  <div className={`text-sm font-semibold flex items-center gap-1 ${t.amount > 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                  <div className={`text-sm font-semibold flex items-center gap-1 ${
+                    t.type === 'income' ? 'text-emerald-500' : t.type === 'expense' ? 'text-rose-500' : 'text-amber-500'
+                  }`}>
                     {t.type === 'income' ? <ArrowDownLeft size={13} /> : <ArrowUpRight size={13} />}
                     {t.type === 'income' ? '+' : '-'}¥{Math.abs(t.amount / 100).toLocaleString()}
                   </div>

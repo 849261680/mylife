@@ -9,7 +9,7 @@ const app = new Hono()
 
 const createTaskSchema = z.object({
   title: z.string().min(1),
-  priority: z.enum(['high', 'medium', 'low']).default('medium'),
+  priority: z.enum(['high', 'low']).default('low'),
   due_date: z.string().nullable().default(null),
   due_time: z.string().nullable().default(null),
   tags: z.array(z.string()).default([]),
@@ -31,6 +31,18 @@ function parseSubtask(row: TaskSubtask & { done: number | boolean }): TaskSubtas
   return { ...row, done: Boolean(row.done) }
 }
 
+function normalizeTaskPriority(priority: unknown): Task['priority'] {
+  return priority === 'high' ? 'high' : 'low'
+}
+
+function parseTask(row: Task & { tags: string | string[] }): Task {
+  return {
+    ...row,
+    priority: normalizeTaskPriority(row.priority),
+    tags: typeof row.tags === 'string' ? JSON.parse(row.tags) as string[] : row.tags,
+  }
+}
+
 // GET /tasks
 app.get('/', (c) => {
   const { status, project_id } = c.req.query()
@@ -41,9 +53,8 @@ app.get('/', (c) => {
   if (project_id) { sql += ' AND project_id = ?'; params.push(project_id) }
   sql += ' ORDER BY due_date ASC, created_at DESC'
 
-  const rows = db.prepare(sql).all(...params) as Task[]
-  const tasks = rows.map(t => ({ ...t, tags: JSON.parse(t.tags as unknown as string) }))
-  return c.json(tasks)
+  const rows = db.prepare(sql).all(...params) as (Task & { tags: string })[]
+  return c.json(rows.map(parseTask))
 })
 
 // POST /tasks
@@ -54,7 +65,7 @@ app.post('/', zValidator('json', createTaskSchema), (c) => {
     id: nanoid(),
     project_id: input.project_id,
     title: input.title,
-    priority: input.priority,
+    priority: normalizeTaskPriority(input.priority),
     status: 'todo',
     due_date: input.due_date,
     due_time: input.due_time,
@@ -145,6 +156,9 @@ app.patch('/:id', (c) => {
   const now = new Date().toISOString()
   // 动态构建 SET 子句（只更新传入的字段）
   return body.then((updates: Partial<Task>) => {
+    if (updates.priority !== undefined) {
+      updates.priority = normalizeTaskPriority(updates.priority)
+    }
     if (updates.status === 'done' && updates.done_at === undefined) {
       updates.done_at = now
     }
@@ -163,8 +177,8 @@ app.patch('/:id', (c) => {
     db.prepare(`UPDATE tasks SET ${setClauses}, updated_at = ? WHERE id = ?`)
       .run(...values, now, id)
 
-    const updated = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as Task
-    return c.json({ ...updated, tags: JSON.parse(updated.tags as unknown as string) })
+    const updated = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as (Task & { tags: string })
+    return c.json(parseTask(updated))
   })
 })
 

@@ -5,6 +5,9 @@ export interface HealthRecord {
   sleep_start?: string    // HH:MM
   sleep_end?: string      // HH:MM
   sleep_minutes?: number  // 计算值，存冗余方便查询
+  breakfast?: string | null
+  lunch?: string | null
+  dinner?: string | null
   steps?: number
   water_ml?: number
   calories?: number

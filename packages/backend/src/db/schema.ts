@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   id          TEXT PRIMARY KEY,
   project_id  TEXT REFERENCES projects(id) ON DELETE SET NULL,
   title       TEXT NOT NULL,
-  priority    TEXT NOT NULL DEFAULT 'medium' CHECK(priority IN ('high','medium','low')),
+  priority    TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','low')),
   status      TEXT NOT NULL DEFAULT 'todo' CHECK(status IN ('todo','in_progress','done','cancelled')),
   due_date    TEXT,
   due_time    TEXT,
@@ -117,6 +117,9 @@ CREATE TABLE IF NOT EXISTS health_records (
   sleep_start    TEXT,
   sleep_end      TEXT,
   sleep_minutes  INTEGER,
+  breakfast      TEXT,
+  lunch          TEXT,
+  dinner         TEXT,
   steps          INTEGER,
   water_ml       INTEGER,
   calories       INTEGER,
@@ -158,6 +161,7 @@ CREATE VIRTUAL TABLE IF NOT EXISTS note_fts USING fts5(
 CREATE TABLE IF NOT EXISTS agent_messages (
   id         TEXT PRIMARY KEY,
   session_id TEXT NOT NULL,
+  trace_id   TEXT,
   role       TEXT NOT NULL CHECK(role IN ('user','assistant')),
   content    TEXT NOT NULL,
   created_at TEXT NOT NULL
@@ -171,13 +175,72 @@ CREATE TABLE IF NOT EXISTS agent_memory (
   updated_at TEXT NOT NULL
 );
 
+-- Agent 可配置项（如系统提示词）
+CREATE TABLE IF NOT EXISTS agent_settings (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
 -- Agent 操作日志
 CREATE TABLE IF NOT EXISTS agent_actions (
   id          TEXT PRIMARY KEY,
   session_id  TEXT NOT NULL,
+  trace_id    TEXT,
   action_type TEXT NOT NULL,
   payload     TEXT NOT NULL DEFAULT '{}',
   status      TEXT NOT NULL DEFAULT 'done' CHECK(status IN ('pending','done','undone')),
+  error       TEXT,
+  created_at  TEXT NOT NULL
+);
+
+-- Agent trace 级别观测
+CREATE TABLE IF NOT EXISTS agent_traces (
+  id          TEXT PRIMARY KEY,
+  session_id  TEXT NOT NULL,
+  user_message TEXT NOT NULL,
+  model       TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'running' CHECK(status IN ('running','done','error')),
+  error       TEXT,
+  tool_rounds INTEGER NOT NULL DEFAULT 0,
+  started_at  TEXT NOT NULL,
+  finished_at TEXT,
+  duration_ms INTEGER
+);
+
+-- Agent tool 调用观测
+CREATE TABLE IF NOT EXISTS agent_tool_runs (
+  id          TEXT PRIMARY KEY,
+  trace_id    TEXT NOT NULL,
+  session_id  TEXT NOT NULL,
+  tool_name   TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'running' CHECK(status IN ('running','done','error')),
+  arguments   TEXT NOT NULL DEFAULT '{}',
+  result      TEXT,
+  error       TEXT,
+  started_at  TEXT NOT NULL,
+  finished_at TEXT,
+  duration_ms INTEGER
+);
+
+-- Agent 事件流观测
+CREATE TABLE IF NOT EXISTS agent_events (
+  id          TEXT PRIMARY KEY,
+  trace_id    TEXT NOT NULL,
+  session_id  TEXT NOT NULL,
+  step_id     TEXT,
+  step_index  INTEGER,
+  event_type  TEXT NOT NULL CHECK(event_type IN (
+    'run_started',
+    'llm_request',
+    'llm_response',
+    'tool_call',
+    'tool_result',
+    'message',
+    'run_finished',
+    'run_failed'
+  )),
+  payload     TEXT NOT NULL DEFAULT '{}',
   created_at  TEXT NOT NULL
 );
 
@@ -192,4 +255,9 @@ CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
 CREATE INDEX IF NOT EXISTS idx_health_date      ON health_records(date);
 CREATE INDEX IF NOT EXISTS idx_note_notebook    ON note_index(notebook_id);
 CREATE INDEX IF NOT EXISTS idx_agent_session    ON agent_messages(session_id);
+CREATE INDEX IF NOT EXISTS idx_agent_messages_trace ON agent_messages(trace_id);
+CREATE INDEX IF NOT EXISTS idx_agent_actions_trace ON agent_actions(trace_id);
+CREATE INDEX IF NOT EXISTS idx_agent_traces_session ON agent_traces(session_id);
+CREATE INDEX IF NOT EXISTS idx_agent_tool_runs_trace ON agent_tool_runs(trace_id);
+CREATE INDEX IF NOT EXISTS idx_agent_events_trace ON agent_events(trace_id);
 `

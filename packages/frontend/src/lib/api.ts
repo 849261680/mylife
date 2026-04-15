@@ -1,6 +1,7 @@
 import type {
   Task, TaskSubtask, CreateTaskInput, UpdateTaskInput, CreateTaskSubtaskInput, UpdateTaskSubtaskInput,
   Project,
+  AgentChatRequest, AgentChatResponse, AgentMessage, AgentPromptConfig, AgentPromptPreview, AgentRerunResponse, AgentStreamChunk, AgentTrace, AgentTraceDetail,
   Goal, CreateGoalInput, UpdateGoalInput,
   CreateHabitInput,
   HabitWithStats,
@@ -82,9 +83,12 @@ export const habitsApi = {
 export const healthApi = {
   list: (from: string, to: string) =>
     request<HealthRecord[]>(`/api/health?from=${from}&to=${to}`),
-  latest: () => request<HealthRecord | null>('/api/health/latest'),
+  latest: (field?: 'weight' | 'sleep') =>
+    request<HealthRecord | null>(`/api/health/latest${field ? `?field=${field}` : ''}`),
   upsert: (input: UpsertHealthInput) =>
     request<HealthRecord>('/api/health', { method: 'PUT', body: JSON.stringify(input) }),
+  removeMetric: (date: string, metric: 'weight' | 'sleep' | 'meals') =>
+    request<{ ok: boolean }>(`/api/health/${date}/metric/${metric}`, { method: 'DELETE' }),
   remove: (date: string) =>
     request<{ ok: boolean }>(`/api/health/${date}`, { method: 'DELETE' }),
 }
@@ -135,4 +139,71 @@ export const notesApi = {
     request<NoteIndex>(`/api/notes/${id}`, { method: 'PATCH', body: JSON.stringify(input) }),
   remove: (id: string) =>
     request<{ ok: boolean }>(`/api/notes/${id}`, { method: 'DELETE' }),
+}
+
+// ── Agent ──────────────────────────────────────────────
+export const agentApi = {
+  chat: (input: AgentChatRequest) =>
+    request<AgentChatResponse>('/api/agent/chat', { method: 'POST', body: JSON.stringify(input) }),
+  messages: (sessionId: string) =>
+    request<AgentMessage[]>(`/api/agent/sessions/${sessionId}/messages`),
+  traces: (sessionId: string) =>
+    request<AgentTrace[]>(`/api/agent/sessions/${sessionId}/traces`),
+  traceDetail: (traceId: string) =>
+    request<AgentTraceDetail>(`/api/agent/traces/${traceId}`),
+  prompt: () =>
+    request<AgentPromptConfig>('/api/agent/prompt'),
+  promptPreview: (sessionId?: string) =>
+    request<AgentPromptPreview>(`/api/agent/prompt/preview${sessionId ? `?session_id=${encodeURIComponent(sessionId)}` : ''}`),
+  updatePrompt: (prompt: string) =>
+    request<AgentPromptConfig>('/api/agent/prompt', { method: 'PUT', body: JSON.stringify({ prompt }) }),
+  resetPrompt: () =>
+    request<AgentPromptConfig>('/api/agent/prompt', { method: 'DELETE' }),
+  rerunTrace: (traceId: string) =>
+    request<AgentRerunResponse>(`/api/agent/traces/${traceId}/rerun`, { method: 'POST' }),
+  stream: async function* (input: AgentChatRequest): AsyncGenerator<AgentStreamChunk> {
+    const res = await fetch(`${BASE}/api/agent/chat/stream`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    })
+
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`API /api/agent/chat/stream → ${res.status}: ${text}`)
+    }
+
+    if (!res.body) {
+      throw new Error('Agent stream is not available')
+    }
+
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buffer = ''
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        let newlineIndex = buffer.indexOf('\n')
+        while (newlineIndex >= 0) {
+          const line = buffer.slice(0, newlineIndex).trim()
+          buffer = buffer.slice(newlineIndex + 1)
+          if (line) {
+            yield JSON.parse(line) as AgentStreamChunk
+          }
+          newlineIndex = buffer.indexOf('\n')
+        }
+      }
+
+      const remaining = buffer.trim()
+      if (remaining) {
+        yield JSON.parse(remaining) as AgentStreamChunk
+      }
+    } finally {
+      reader.releaseLock()
+    }
+  },
 }

@@ -2,8 +2,102 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { Flame, Award, TrendingUp, Plus } from 'lucide-react'
 import { habitsApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
+import type { HabitHeatmapCell } from '@mylife/shared'
 
 interface PageProps { darkMode: boolean }
+
+const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六']
+const MONTH_LABELS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+const HABIT_COLOR_MAP: Record<string, string> = {
+  'bg-orange-500': '#f97316',
+  'bg-indigo-500': '#6366f1',
+  'bg-emerald-500': '#10b981',
+  'bg-sky-500': '#0ea5e9',
+  'bg-rose-500': '#f43f5e',
+  'bg-amber-500': '#f59e0b',
+  'bg-violet-500': '#8b5cf6',
+}
+
+function resolveHabitColor(colorClass: string) {
+  return HABIT_COLOR_MAP[colorClass] ?? '#f97316'
+}
+
+function Heatmap({
+  cells,
+  colorClass,
+  darkMode,
+}: {
+  cells: HabitHeatmapCell[]
+  colorClass: string
+  darkMode: boolean
+}) {
+  const columns: HabitHeatmapCell[][] = []
+  for (let i = 0; i < cells.length; i += 7) {
+    columns.push(cells.slice(i, i + 7))
+  }
+
+  const baseColor = resolveHabitColor(colorClass)
+  const emptyColor = darkMode ? '#1f2937' : '#f3f4f6'
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-end gap-1">
+        <div className="grid grid-rows-7 gap-1 pt-4">
+          {['一', ' ', '三', ' ', '五', ' ', '日'].map((label, index) => (
+            <div key={`${label}-${index}`} className={`h-2.5 text-[10px] leading-none ${subtleText(darkMode)}`}>
+              {label}
+            </div>
+          ))}
+        </div>
+        <div className="flex-1 overflow-x-auto pb-1">
+          <div className="inline-flex min-w-full gap-1">
+            {columns.map((week, columnIndex) => (
+              <div key={columnIndex} className="flex flex-col gap-1">
+                {week.map((cell) => (
+                  <div
+                    key={cell.date}
+                    title={`${cell.date} · ${cell.done ? '已完成' : '未完成'}`}
+                    className="h-2.5 w-2.5 rounded-[2px]"
+                    style={{ backgroundColor: cell.done ? baseColor : emptyColor, opacity: cell.done ? 1 : 1 }}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 gap-1 overflow-hidden">
+          {columns.map((week, columnIndex) => {
+            const first = week[0]
+            const monthLabel = first ? MONTH_LABELS[new Date(first.date).getMonth()] : ''
+            const previous = columns[columnIndex - 1]?.[0]
+            const previousMonth = previous ? new Date(previous.date).getMonth() : null
+            const currentMonth = first ? new Date(first.date).getMonth() : null
+
+            return (
+              <div key={`month-${columnIndex}`} className="w-2.5 text-[10px] leading-none text-center">
+                {columnIndex === 0 || currentMonth !== previousMonth ? (
+                  <span className={subtleText(darkMode)}>{monthLabel}</span>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+        <div className={`flex items-center gap-1 text-[10px] ${subtleText(darkMode)}`}>
+          <span>少</span>
+          <div className="h-2.5 w-2.5 rounded-[2px]" style={{ backgroundColor: emptyColor }} />
+          <div className="h-2.5 w-2.5 rounded-[2px]" style={{ backgroundColor: baseColor }} />
+          <span>多</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function subtleText(darkMode: boolean) {
+  return darkMode ? 'text-gray-500' : 'text-gray-400'
+}
 
 export default function HabitsPage({ darkMode }: PageProps) {
   const [isCreating, setIsCreating] = useState(false)
@@ -14,7 +108,11 @@ export default function HabitsPage({ darkMode }: PageProps) {
   const textH   = darkMode ? 'text-white'    : 'text-gray-900'
   const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
   const cardBg  = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
-  const weekDays = ['一', '二', '三', '四', '五', '六', '日']
+  const recentDays = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date()
+    date.setDate(date.getDate() - (6 - index))
+    return date
+  })
 
   const { data: habits, loading, refetch } = useApi(() => habitsApi.list())
 
@@ -173,21 +271,31 @@ export default function HabitsPage({ darkMode }: PageProps) {
                         <div className={`h-full rounded-full ${habit.color}`} style={{ width: `${pct}%` }} />
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs ${subText}`}>本周</span>
+                      <div className="mb-3 flex items-center gap-2">
+                        <span className={`text-xs ${subText}`}>最近7天</span>
                         <div className="flex gap-1.5">
-                          {weekDays.map((d, i) => (
-                            <div key={d} className="flex flex-col items-center gap-1">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${
-                                habit.week_data[i]
-                                  ? `${habit.color} text-white`
-                                  : darkMode ? 'bg-gray-800 text-gray-600' : 'bg-gray-100 text-gray-400'
-                              }`}>
-                                {habit.week_data[i] ? '✓' : d}
+                          {recentDays.map((day, i) => {
+                            const weekdayLabel = WEEKDAY_LABELS[day.getDay()]
+                            const dateLabel = `${day.getMonth() + 1}/${day.getDate()}`
+
+                            return (
+                              <div key={dateLabel} className="flex flex-col items-center gap-1">
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${
+                                  habit.week_data[i]
+                                    ? `${habit.color} text-white`
+                                    : darkMode ? 'bg-gray-800 text-gray-600' : 'bg-gray-100 text-gray-400'
+                                }`}>
+                                  {habit.week_data[i] ? '✓' : weekdayLabel}
+                                </div>
                               </div>
-                            </div>
-                          ))}
+                            )
+                          })}
                         </div>
+                      </div>
+
+                      <div>
+                        <div className={`mb-2 text-xs ${subText}`}>打卡热力图</div>
+                        <Heatmap cells={habit.heatmap} colorClass={habit.color} darkMode={darkMode} />
                       </div>
                     </div>
 

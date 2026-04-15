@@ -10,10 +10,16 @@
   "dependencies": {
     "@hono/node-server": "^1.14.3",
     "@hono/zod-validator": "^0.7.6",
+    "@langfuse/openai": "^5.1.0",
+    "@langfuse/otel": "^5.1.0",
+    "@langfuse/tracing": "^5.1.0",
     "@mylife/shared": "workspace:*",
+    "@opentelemetry/sdk-node": "^0.214.0",
     "better-sqlite3": "^11.10.0",
+    "dotenv": "^17.4.2",
     "hono": "^4.7.11",
     "nanoid": "^5.1.5",
+    "openai": "^6.34.0",
     "zod": "^3.25.49"
   },
   "devDependencies": {

@@ -75,7 +75,9 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
     if (!nb) {
       // Need to create a default notebook first
       const newNb = await notesApi.createNotebook('我的笔记', 'bg-indigo-500')
-      await notesApi.create({ notebook_id: newNb.id, title: '新建笔记', content: '' })
+      const note = await notesApi.create({ notebook_id: newNb.id, title: '新建笔记', content: '' })
+      setActiveNotebook(newNb.id)
+      void openNote(note)
       refetchNbs()
       refetchNotes()
       return
