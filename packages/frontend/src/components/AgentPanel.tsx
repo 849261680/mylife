@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Sparkles, Wrench, ArrowRight } from 'lucide-react'
+import { Sparkles, ArrowRight } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import type { AgentAction, AgentMessage, AgentStreamChunk } from '@mylife/shared'
+import type { AgentMessage, AgentStreamChunk } from '@mylife/shared'
 import { agentApi } from '../lib/api'
 
 const STORAGE_KEY = 'mylife-agent-session'
@@ -67,7 +67,6 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [latestActions, setLatestActions] = useState<AgentAction[]>([])
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   const textH = darkMode ? 'text-white' : 'text-gray-900'
@@ -76,8 +75,7 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
   const inputBg = darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
   const assistantBubble = darkMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-100 text-gray-800'
   const userBubble = compact ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'
-  const visibleMessages = compact ? messages.slice(-6) : messages
-  const visibleActions = compact ? latestActions.slice(0, 3) : latestActions
+  const visibleMessages = compact && fillHeight ? messages.slice(-2) : compact ? messages.slice(-4) : messages
   const messageAreaClass = fillHeight
     ? 'flex-1 min-h-0'
     : compact
@@ -169,7 +167,6 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
 
         if (chunk.type === 'done') {
           finalChunk = chunk
-          setLatestActions(chunk.actions)
           setMessages((current) => current.map((item) => (
             item.id === assistantMessageId
               ? { ...item, session_id: chunk.session_id, content: chunk.reply }
@@ -207,23 +204,25 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
   }
 
   return (
-    <div className={`rounded-xl border ${cardBg} ${fillHeight ? 'xl:flex xl:h-full xl:min-h-0 xl:flex-col' : ''}`}>
-      <div className={`flex items-center justify-between border-b px-5 py-4 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+    <div className={`rounded-xl border ${cardBg} ${fillHeight ? 'xl:flex xl:h-full xl:min-h-0 xl:flex-col xl:overflow-hidden' : ''}`}>
+      <div className={`flex items-center justify-between border-b ${compact && fillHeight ? 'px-4 py-3' : 'px-5 py-4'} ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-500">
             <Sparkles size={16} />
           </div>
           <div>
-            <h2 className={`text-sm font-semibold ${textH}`}>{compact ? '今日助理' : 'Agent'}</h2>
+            <h2 className={`font-semibold ${textH} ${compact && fillHeight ? 'text-[13px]' : 'text-sm'}`}>{compact ? '今日助理' : 'Agent'}</h2>
             <p className={`text-xs ${subText}`}>
               {compact
-                ? '直接总结今天安排、整理待办，或替你执行结构化写入'
+                ? fillHeight
+                  ? '先看当前这轮建议，需要更多历史再展开完整对话'
+                  : '直接总结今天安排、整理待办，或替你执行结构化写入'
                 : '可读取全量数据，当前支持任务 / 目标 / 习惯 / 事件 / 财务 / 健康 / 笔记查询与部分写入'}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {sessionId && <span className={`text-xs ${subText}`}>会话 {sessionId.slice(0, 8)}</span>}
+          {sessionId && !fillHeight && <span className={`text-xs ${subText}`}>会话 {sessionId.slice(0, 8)}</span>}
           {compact && onOpenFullPage && (
             <button
               onClick={onOpenFullPage}
@@ -235,10 +234,10 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
         </div>
       </div>
 
-      <div className={`grid gap-0 ${compact ? 'lg:grid-cols-[minmax(0,1fr)_260px]' : 'lg:grid-cols-[minmax(0,1fr)_288px]'} ${fillHeight ? 'xl:flex-1 xl:min-h-0' : ''}`}>
-        <section className={`min-w-0 ${fillHeight ? 'xl:flex xl:min-h-0 xl:flex-col' : ''}`}>
-          {compact && (
-            <div className="flex flex-wrap gap-2 px-5 pt-4">
+      <div className={`${fillHeight ? 'xl:flex xl:flex-1 xl:min-h-0 xl:flex-col' : ''}`}>
+        <section className={`min-w-0 ${fillHeight ? 'xl:flex xl:flex-1 xl:min-h-0 xl:flex-col' : ''}`}>
+          {compact && !fillHeight && visibleMessages.length === 0 && (
+            <div className={`flex flex-wrap gap-2 ${fillHeight ? 'px-4 pt-3' : 'px-5 pt-4'}`}>
               {QUICK_PROMPTS.map((prompt) => (
                 <button
                   key={prompt}
@@ -252,7 +251,13 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
             </div>
           )}
 
-          <div ref={scrollRef} className={`${messageAreaClass} space-y-3 overflow-y-auto px-5 py-4`}>
+          {compact && fillHeight && messages.length > visibleMessages.length && (
+            <div className={`px-4 pt-3 text-xs ${subText}`}>
+              已折叠更早的 {messages.length - visibleMessages.length} 条历史，只保留当前轮对话。
+            </div>
+          )}
+
+          <div ref={scrollRef} className={`${messageAreaClass} ${compact && fillHeight ? 'space-y-2 px-4 py-3' : 'space-y-3 px-5 py-4'} overflow-y-auto`}>
             {visibleMessages.length === 0 ? (
               <div className={`py-12 text-center text-sm ${subText}`}>
                 <div className="mb-3 text-4xl">🤖</div>
@@ -262,7 +267,7 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
               </div>
             ) : visibleMessages.map((message) => (
               <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-3xl rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                <div className={`max-w-3xl rounded-2xl ${compact && fillHeight ? 'px-3.5 py-2.5' : 'px-4 py-3'} text-sm leading-relaxed ${
                   message.role === 'user' ? userBubble : assistantBubble
                 }`}>
                   {message.role === 'assistant'
@@ -277,13 +282,13 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
             ))}
           </div>
 
-          <form onSubmit={handleSubmit} className={`border-t px-5 py-4 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+          <form onSubmit={handleSubmit} className={`border-t ${compact && fillHeight ? 'px-4 py-3' : 'px-5 py-4'} ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
             <div className="relative">
               <textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 placeholder={compact ? '让今日助理整理安排、补任务或创建事件…' : '给 Agent 下达指令，比如：帮我创建一个明天 14:00 的事件，并整理今天的待办。'}
-                className={`${compact ? 'h-24' : 'h-28'} w-full resize-none rounded-xl border px-3 py-3 pr-28 text-sm outline-none ${inputBg}`}
+                className={`${compact ? (fillHeight ? 'h-20' : 'h-24') : 'h-28'} w-full resize-none rounded-xl border px-3 py-3 pr-28 text-sm outline-none ${inputBg}`}
               />
               <button
                 type="submit"
@@ -296,25 +301,6 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
             {error && <div className="mt-2 text-xs text-red-500">{error}</div>}
           </form>
         </section>
-
-        <aside className={`${darkMode ? 'border-gray-800' : 'border-gray-100'} border-t lg:border-l lg:border-t-0 ${fillHeight ? 'xl:flex xl:min-h-0 xl:flex-col' : ''}`}>
-          <div className={`border-b px-5 py-4 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
-            <div className="flex items-center gap-2">
-              <Wrench size={15} className="text-emerald-500" />
-              <h3 className={`text-sm font-semibold ${textH}`}>本轮操作</h3>
-            </div>
-          </div>
-          <div className={`space-y-3 px-5 py-4 ${fillHeight ? 'xl:flex-1 xl:overflow-y-auto' : ''}`}>
-            {visibleActions.length === 0 ? (
-              <div className={`text-sm ${subText}`}>这一轮还没有执行写操作。</div>
-            ) : visibleActions.map((action) => (
-              <div key={action.id} className={`rounded-lg border px-3 py-3 ${darkMode ? 'border-gray-800 bg-gray-900/60' : 'border-gray-100 bg-gray-50/80'}`}>
-                <div className={`text-sm font-medium ${textH}`}>{action.action_type}</div>
-                <div className={`mt-1 text-xs ${subText}`}>{new Date(action.created_at).toLocaleString('zh-CN')}</div>
-              </div>
-            ))}
-          </div>
-        </aside>
       </div>
     </div>
   )

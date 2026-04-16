@@ -1,503 +1,253 @@
-import {
-  CheckCircle2, Circle, Clock, Plus, Flag,
-  ArrowRight, X, type LucideIcon,
-} from 'lucide-react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useRef, useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
-import { goalsApi, tasksApi, notesApi } from '../lib/api'
-import { useApi } from '../lib/useApi'
-import type { Goal, TaskSubtask } from '@mylife/shared'
+import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, Flag, ListTodo } from 'lucide-react'
 import AgentPanel from '../components/AgentPanel'
-
-type SendStatus = 'idle' | 'sending' | 'sent' | 'error'
-
-interface CardProps { children: ReactNode; className?: string; darkMode: boolean }
-function Card({ children, className = '', darkMode }: CardProps) {
-  return (
-    <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-100 shadow-sm'} ${className}`}>
-      {children}
-    </div>
-  )
-}
-
-interface SectionHeaderProps {
-  title: string; icon: LucideIcon; color: string; action?: string; onAction?: () => void; darkMode: boolean
-}
-function SectionHeader({ title, icon: Icon, color, action, onAction, darkMode }: SectionHeaderProps) {
-  return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
-        <div className={`w-6 h-6 ${color} rounded-md flex items-center justify-center`}>
-          <Icon size={13} className="text-white" />
-        </div>
-        <h2 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>{title}</h2>
-      </div>
-      {action && (
-        <button onClick={onAction} className={`flex items-center gap-1 text-xs transition-colors ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}>
-          {action} <ArrowRight size={11} />
-        </button>
-      )}
-    </div>
-  )
-}
-
-function Skeleton({ darkMode, className = '' }: { darkMode: boolean; className?: string }) {
-  return <div className={`rounded animate-pulse ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} ${className}`} />
-}
-
-const priorityDot: Record<string, string> = {
-  high: 'bg-red-400', low: 'bg-blue-400',
-}
+import { goalsApi, tasksApi } from '../lib/api'
+import { useApi } from '../lib/useApi'
 
 interface PageProps {
   darkMode: boolean
   onNavigate: (page: 'dashboard' | 'goals' | 'tasks' | 'calendar' | 'habits' | 'finance' | 'health' | 'notes' | 'agent') => void
 }
 
+function Card({
+  darkMode,
+  children,
+  className = '',
+}: {
+  darkMode: boolean
+  children: React.ReactNode
+  className?: string
+}) {
+  return (
+    <div className={`rounded-3xl border p-5 ${darkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-100 bg-white shadow-sm'} ${className}`}>
+      {children}
+    </div>
+  )
+}
+
+function formatDateLabel(date: string | null) {
+  if (!date) return '未设置日期'
+
+  const [year, month, day] = date.split('-')
+  if (!year || !month || !day) return date
+  return `${month}-${day}`
+}
+
 export default function Dashboard({ darkMode, onNavigate }: PageProps) {
   const textH = darkMode ? 'text-white' : 'text-gray-900'
-  const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
-  const inputBg = darkMode ? 'bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-700 placeholder-gray-400'
-
+  const subText = darkMode ? 'text-gray-400' : 'text-gray-500'
+  const text = darkMode ? 'text-gray-300' : 'text-gray-600'
   const today = new Date().toISOString().slice(0, 10)
-  const quickNotebookId = useRef<string | null>(null)
-  const [quickNote, setQuickNote] = useState('')
-  const [quickNoteStatus, setQuickNoteStatus] = useState<SendStatus>('idle')
-  const [isCreatingTask, setIsCreatingTask] = useState(false)
-  const [newTaskTitle, setNewTaskTitle] = useState('')
-  const [taskError, setTaskError] = useState<string | null>(null)
-  const [creatingTask, setCreatingTask] = useState(false)
-  const [creatingSubtaskFor, setCreatingSubtaskFor] = useState<string | null>(null)
-  const [newSubtaskTitle, setNewSubtaskTitle] = useState('')
-  const [subtaskError, setSubtaskError] = useState<string | null>(null)
+  const leftColumnRef = useRef<HTMLDivElement | null>(null)
+  const [rightHeight, setRightHeight] = useState<number | null>(null)
 
-  const { data: tasks, loading: tasksLoading, refetch: refetchTasks } = useApi(() => tasksApi.list())
-  const { data: subtasks, refetch: refetchSubtasks } = useApi(() => tasksApi.subtasks())
-  const { data: goals, loading: goalsLoading, refetch: refetchGoals } = useApi(() => goalsApi.list())
+  const { data: goals, loading: goalsLoading } = useApi(() => goalsApi.list())
+  const { data: tasks, loading: tasksLoading } = useApi(() => tasksApi.list())
 
-  const todayTasks = (tasks?.filter(t => t.due_date === today) ?? [])
+  const activeGoals = (goals ?? [])
+    .filter(goal => goal.status !== 'done')
     .sort((a, b) => {
-      if (a.status === 'done' && b.status !== 'done') return 1
-      if (a.status !== 'done' && b.status === 'done') return -1
+      if (a.target_date && b.target_date) return a.target_date.localeCompare(b.target_date)
+      if (a.target_date) return -1
+      if (b.target_date) return 1
+      return a.created_at.localeCompare(b.created_at)
+    })
+  const activeTasks = (tasks ?? [])
+    .filter(task => task.status !== 'done' && task.status !== 'cancelled')
+    .sort((a, b) => {
+      const aDueToday = a.due_date === today
+      const bDueToday = b.due_date === today
+      if (aDueToday && !bDueToday) return -1
+      if (!aDueToday && bDueToday) return 1
       if (a.priority === 'high' && b.priority !== 'high') return -1
       if (a.priority !== 'high' && b.priority === 'high') return 1
+      if (a.due_date && b.due_date) return a.due_date.localeCompare(b.due_date)
+      if (a.due_date) return -1
+      if (b.due_date) return 1
       if (a.due_time && b.due_time) return a.due_time.localeCompare(b.due_time)
-      return 0
+      if (a.due_time) return -1
+      if (b.due_time) return 1
+      return a.created_at.localeCompare(b.created_at)
     })
-  const subtasksByTask = (subtasks ?? []).reduce<Record<string, TaskSubtask[]>>((acc, subtask) => {
-    if (!acc[subtask.task_id]) acc[subtask.task_id] = []
-    acc[subtask.task_id].push(subtask)
-    return acc
-  }, {})
-  const progress = todayTasks.reduce(
-    (acc, task) => {
-      const taskSubtasks = subtasksByTask[task.id] ?? []
+  const primaryGoal = activeGoals[0]
+  const remainingGoalsCount = Math.max(activeGoals.length - 1, 0)
+  const featuredTasks = activeTasks.slice(0, 3)
 
-      if (taskSubtasks.length > 0) {
-        acc.total += taskSubtasks.length
-        acc.done += task.status === 'done'
-          ? taskSubtasks.length
-          : taskSubtasks.filter(subtask => subtask.done).length
-        return acc
-      }
+  useEffect(() => {
+    const element = leftColumnRef.current
+    if (!element || typeof ResizeObserver === 'undefined') return
 
-      acc.total += 1
-      if (task.status === 'done') acc.done += 1
-      return acc
-    },
-    { done: 0, total: 0 }
-  )
-  const activeGoals = (goals ?? []).filter(goal => goal.status !== 'done')
-  const longGoals = activeGoals
-    .filter(goal => goal.goal_type === 'long')
-    .sort((a, b) => (a.target_date ?? '9999-12-31').localeCompare(b.target_date ?? '9999-12-31'))
-  const shortGoals = activeGoals
-    .filter(goal => goal.goal_type === 'short')
-    .sort((a, b) => (a.target_date ?? '9999-12-31').localeCompare(b.target_date ?? '9999-12-31'))
-
-  const toggleTask = async (id: string, done: boolean) => {
-    await tasksApi.update(id, { status: done ? 'todo' : 'done' })
-    refetchTasks()
-  }
-
-  const togglePriority = async (id: string, current: string) => {
-    const next = current === 'high' ? 'low' : 'high'
-    await tasksApi.update(id, { priority: next })
-    refetchTasks()
-  }
-
-  const createTodayTask = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const title = newTaskTitle.trim()
-    if (!title) return
-
-    try {
-      setCreatingTask(true)
-      setTaskError(null)
-      await tasksApi.create({
-        title,
-        priority: 'low',
-        due_date: today,
-        due_time: null,
-        tags: [],
-      })
-      setNewTaskTitle('')
-      setIsCreatingTask(false)
-      refetchTasks()
-    } catch (error) {
-      setTaskError(error instanceof Error ? error.message : '添加今日任务失败')
-    } finally {
-      setCreatingTask(false)
-    }
-  }
-
-  const createSubtask = async (event: FormEvent<HTMLFormElement>, taskId: string) => {
-    event.preventDefault()
-    const title = newSubtaskTitle.trim()
-    if (!title) return
-
-    try {
-      setSubtaskError(null)
-      await tasksApi.createSubtask(taskId, { title })
-      setNewSubtaskTitle('')
-      setCreatingSubtaskFor(null)
-      refetchSubtasks()
-    } catch (error) {
-      setSubtaskError(error instanceof Error ? error.message : '添加子任务失败')
-    }
-  }
-
-  const toggleSubtask = async (subtask: TaskSubtask) => {
-    await tasksApi.updateSubtask(subtask.id, { done: !subtask.done })
-    refetchSubtasks()
-  }
-
-  const toggleSubtaskPriority = async (subtask: TaskSubtask) => {
-    await tasksApi.updateSubtask(subtask.id, { priority: subtask.priority === 'high' ? 'low' : 'high' })
-    refetchSubtasks()
-  }
-
-  const ensureQuickNotebook = async () => {
-    if (quickNotebookId.current) return quickNotebookId.current
-
-    const data = await notesApi.notebooks()
-    const existing = data.notebooks.find(notebook => notebook.name === '快速笔记')
-    if (existing) {
-      quickNotebookId.current = existing.id
-      return existing.id
+    const syncHeight = () => {
+      setRightHeight(element.getBoundingClientRect().height)
     }
 
-    const notebook = await notesApi.createNotebook('快速笔记', 'bg-sky-500')
-    quickNotebookId.current = notebook.id
-    return notebook.id
-  }
+    syncHeight()
 
-  const sendQuickNote = async () => {
-    const content = quickNote.trim()
-    if (!content) return
+    const observer = new ResizeObserver(() => syncHeight())
+    observer.observe(element)
+    window.addEventListener('resize', syncHeight)
 
-    setQuickNoteStatus('sending')
-    const notebookId = await ensureQuickNotebook()
-    const firstLine = content.split('\n').find(line => line.trim())?.trim()
-    const title = firstLine ? firstLine.slice(0, 30) : `快速笔记 ${today}`
-
-    await notesApi.create({
-      notebook_id: notebookId,
-      title,
-      content,
-    })
-    setQuickNote('')
-    setQuickNoteStatus('sent')
-  }
-
-  const toggleGoal = async (goal: Goal) => {
-    await goalsApi.update(goal.id, { status: goal.status === 'done' ? 'active' : 'done' })
-    refetchGoals()
-  }
-
-  const handleAgentActionComplete = () => {
-    refetchTasks()
-    refetchSubtasks()
-    refetchGoals()
-  }
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', syncHeight)
+    }
+  }, [])
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-5 xl:h-[calc(100vh-8.5rem)] xl:overflow-hidden">
-      <div className="grid gap-4 xl:h-full xl:min-h-0 xl:grid-cols-[minmax(380px,460px)_minmax(0,1fr)] 2xl:grid-cols-[minmax(420px,500px)_minmax(0,1fr)]">
-        <div className="space-y-4 xl:grid xl:h-full xl:min-h-0 xl:grid-rows-[minmax(0,0.9fr)_minmax(0,1.05fr)_minmax(0,1fr)] xl:space-y-0">
-          <Card darkMode={darkMode} className="xl:flex xl:min-h-0 xl:flex-col">
-            <SectionHeader title="目标" icon={Flag} color="bg-emerald-500" action="所有目标" onAction={() => onNavigate('goals')} darkMode={darkMode} />
-            <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
-              {goalsLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map(i => <Skeleton key={i} darkMode={darkMode} className="h-12" />)}
+    <div className="mx-auto w-full max-w-[1440px]">
+      <div className="grid min-h-[calc(100vh-11.5rem)] items-start gap-5 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+        <div ref={leftColumnRef} className="space-y-5">
+          <Card darkMode={darkMode} className={darkMode ? 'p-5 shadow-none' : 'p-5 shadow-[0_20px_50px_-36px_rgba(99,102,241,0.25)]'}>
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl ${darkMode ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-600'}`}>
+                  <Flag size={18} />
                 </div>
-              ) : activeGoals.length === 0 ? (
-                <div className={`py-8 text-center text-sm ${subText}`}>还没有进行中的目标</div>
-              ) : (
-                <div className="space-y-4">
-                  {([
-                    ['长期目标', longGoals],
-                    ['短期目标', shortGoals],
-                  ] as [string, Goal[]][]).map(([label, items]) => (
-                    <div key={label}>
-                      <div className="mb-2 flex items-center justify-between">
-                        <h3 className={`text-xs font-medium ${textH}`}>{label}</h3>
-                        <span className={`text-xs ${subText}`}>{items.length} 项</span>
-                      </div>
-                      {items.length === 0 ? (
-                        <div className={`rounded-lg px-2 py-4 text-center text-xs ${darkMode ? 'bg-gray-800 text-gray-500' : 'bg-gray-50 text-gray-400'}`}>暂无{label}</div>
-                      ) : (
-                        <div className="space-y-1.5">
-                          {items.slice(0, 3).map(goal => (
-                            <button
-                              key={goal.id}
-                              onClick={() => toggleGoal(goal)}
-                              className={`flex w-full items-start gap-3 rounded-lg px-2 py-2 text-left transition-colors ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
-                            >
-                              <span className="mt-0.5 flex-shrink-0">
-                                {goal.status === 'done'
-                                  ? <CheckCircle2 size={16} className="text-emerald-500" />
-                                  : <Circle size={16} className={subText} />
-                                }
-                              </span>
-                              <span className="min-w-0 flex-1">
-                                <span className={`block truncate text-sm ${textH}`}>{goal.title}</span>
-                                <span className={`mt-0.5 block truncate text-xs ${subText}`}>
-                                  {goal.target_date ? `截止 ${goal.target_date}` : '未设置目标日期'}
-                                </span>
-                              </span>
-                            </button>
-                          ))}
-                          {items.length > 3 && (
-                            <button
-                              onClick={() => onNavigate('goals')}
-                              className={`px-2 text-xs transition-colors ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
-                            >
-                              还有 {items.length - 3} 项，查看全部
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div>
+                  <div className={`text-xs font-medium uppercase tracking-[0.18em] ${subText}`}>主目标</div>
+                  <h2 className={`mt-1 text-base font-semibold ${textH}`}>目标</h2>
+                  <p className={`mt-1 text-sm ${text}`}>先只突出你现在最该推进的 1 个目标，其他目标退成次级入口。</p>
                 </div>
-              )}
-            </div>
-          </Card>
-
-          <Card darkMode={darkMode} className="xl:flex xl:min-h-0 xl:flex-col">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-indigo-500 rounded-md flex items-center justify-center">
-                  <CheckCircle2 size={13} className="text-white" />
-                </div>
-                <h2 className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>今日任务</h2>
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => { setIsCreatingTask(true); setTaskError(null) }}
-                  className="flex items-center gap-1 text-xs text-indigo-500 transition-colors hover:text-indigo-600"
-                >
-                  <Plus size={12} />添加
-                </button>
-                <button onClick={() => onNavigate('tasks')} className={`flex items-center gap-1 text-xs transition-colors ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}>
-                  查看全部 <ArrowRight size={11} />
-                </button>
-              </div>
-            </div>
-            <div className="xl:min-h-0 xl:flex-1 xl:overflow-y-auto xl:pr-1">
-              {isCreatingTask && (
-                <form onSubmit={createTodayTask} className={`mb-3 flex flex-col gap-2 rounded-lg border p-3 ${darkMode ? 'border-gray-800 bg-gray-800' : 'border-gray-100 bg-gray-50'}`}>
-                  <input
-                    autoFocus
-                    value={newTaskTitle}
-                    onChange={event => setNewTaskTitle(event.target.value)}
-                    placeholder="输入今日任务"
-                    className={`rounded-lg border px-3 py-2 text-sm outline-none ${inputBg}`}
-                  />
-                  {taskError && <div className="text-xs text-red-500">{taskError}</div>}
-                  <div className="flex gap-2">
-                    <button type="submit" disabled={creatingTask || !newTaskTitle.trim()} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs text-white disabled:opacity-50">
-                      {creatingTask ? '保存中...' : '保存'}
-                    </button>
-                    <button type="button" onClick={() => setIsCreatingTask(false)} className={`rounded-lg border px-3 py-1.5 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>
-                      取消
-                    </button>
-                  </div>
-                </form>
-              )}
-              {tasksLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map(i => <Skeleton key={i} darkMode={darkMode} className="h-10" />)}
-                </div>
-              ) : todayTasks.length === 0 ? (
-                <div className={`text-center py-8 text-sm ${subText}`}>今天没有到期任务</div>
-              ) : (
-                <div className="space-y-0">
-                  <AnimatePresence initial={false}>
-                  {todayTasks.slice(0, 4).map(task => (
-                    <motion.div
-                      key={task.id}
-                      layout
-                      transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      className="py-2.5"
-                    >
-                      <div className="group flex items-start gap-3">
-                        <button onClick={() => toggleTask(task.id, task.status === 'done')} className="mt-0.5 flex-shrink-0 cursor-pointer">
-                          {task.status === 'done'
-                            ? <CheckCircle2 size={16} className="text-indigo-500" />
-                            : <Circle size={16} className={subText} />
-                          }
-                        </button>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className={`text-sm leading-snug ${task.status === 'done' ? `line-through ${subText}` : textH}`}>
-                              {task.title}
-                            </p>
-                            {task.status !== 'done' && (
-                              <button
-                                onClick={() => togglePriority(task.id, task.priority)}
-                                title={task.priority === 'high' ? '高优先级，点击切换' : '低优先级，点击切换'}
-                                className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 transition-colors ${priorityDot[task.priority] ?? 'bg-gray-300'}`}
-                              />
-                            )}
-                            <button
-                              onClick={() => { setCreatingSubtaskFor(task.id); setSubtaskError(null); setNewSubtaskTitle('') }}
-                              className={`text-indigo-400 hover:text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity`}
-                            >
-                              <Plus size={14} />
-                            </button>
-                            <button
-                              onClick={async () => { await tasksApi.remove(task.id); refetchTasks() }}
-                              className={`opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-400'}`}
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                          {task.due_time && (
-                            <div className="flex items-center gap-1 mt-0.5">
-                              <Clock size={11} className={subText} />
-                              <span className={`text-xs ${subText}`}>{task.due_time}</span>
-                            </div>
-                          )}
-                          {(subtasksByTask[task.id] ?? []).length > 0 && (
-                            <div className="mt-2 space-y-1">
-                              <AnimatePresence initial={false}>
-                              {[...(subtasksByTask[task.id] ?? [])].sort((a, b) => {
-                                if (!a.done && b.done) return -1
-                                if (a.done && !b.done) return 1
-                                if (a.priority === 'high' && b.priority !== 'high') return -1
-                                if (a.priority !== 'high' && b.priority === 'high') return 1
-                                return 0
-                              }).map(subtask => (
-                                <motion.div
-                                  key={subtask.id}
-                                  layout
-                                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                                  className={`group flex w-full items-center gap-2 rounded-lg px-2 py-1 text-xs ${darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}`}
-                                >
-                                  <button
-                                    onClick={() => toggleSubtask(subtask)}
-                                    className="flex-shrink-0"
-                                  >
-                                    {subtask.done
-                                      ? <CheckCircle2 size={13} className="text-indigo-500" />
-                                      : <Circle size={13} className={subText} />
-                                    }
-                                  </button>
-                                  <div className="flex flex-1 items-center gap-1.5">
-                                    <span className={subtask.done ? `line-through ${subText} text-xs` : `${textH} text-xs`}>{subtask.title}</span>
-                                    {!subtask.done && (
-                                      <button
-                                        onClick={() => toggleSubtaskPriority(subtask)}
-                                        className={`w-2 h-2 rounded-full flex-shrink-0 transition-colors ${priorityDot[subtask.priority] ?? 'bg-gray-300'}`}
-                                      />
-                                    )}
-                                    <button
-                                      onClick={async () => { await tasksApi.removeSubtask(subtask.id); refetchSubtasks() }}
-                                      className={`opacity-0 group-hover:opacity-100 transition-opacity ${darkMode ? 'text-gray-600 hover:text-red-400' : 'text-gray-300 hover:text-red-400'}`}
-                                    >
-                                      <X size={12} />
-                                    </button>
-                                  </div>
-                                </motion.div>
-                              ))}
-                              </AnimatePresence>
-                            </div>
-                          )}
-                          {creatingSubtaskFor === task.id && (
-                            <form onSubmit={(event) => createSubtask(event, task.id)} className="mt-2 space-y-2">
-                              <input
-                                autoFocus
-                                value={newSubtaskTitle}
-                                onChange={event => setNewSubtaskTitle(event.target.value)}
-                                placeholder="输入子任务"
-                                className={`w-full rounded-lg border px-2 py-1.5 text-xs outline-none ${inputBg}`}
-                              />
-                              {subtaskError && <div className="text-xs text-red-500">{subtaskError}</div>}
-                              <div className="flex gap-2">
-                                <button type="submit" disabled={!newSubtaskTitle.trim()} className="rounded-lg bg-indigo-600 px-2 py-1 text-xs text-white disabled:opacity-50">保存</button>
-                                <button type="button" onClick={() => setCreatingSubtaskFor(null)} className={`rounded-lg border px-2 py-1 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>取消</button>
-                              </div>
-                            </form>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                  </AnimatePresence>
-                </div>
-              )}
-              {!tasksLoading && todayTasks.length > 0 && (
-                <div className={`mt-3 pt-3 border-t ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className={`text-xs ${subText}`}>今日进度</span>
-                    <span className={`text-xs font-medium ${textH}`}>{progress.done}/{progress.total}</span>
-                  </div>
-                  <div className={`h-1.5 rounded-full overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <div className="h-full bg-indigo-500 rounded-full transition-all"
-                      style={{ width: `${progress.total > 0 ? (progress.done / progress.total) * 100 : 0}%` }} />
-                  </div>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          <Card darkMode={darkMode} className="xl:flex xl:min-h-0 xl:flex-col">
-            <SectionHeader title="快速笔记" icon={CheckCircle2} color="bg-sky-500" action="所有笔记" onAction={() => onNavigate('notes')} darkMode={darkMode} />
-            <textarea
-              value={quickNote}
-              onChange={event => {
-                setQuickNote(event.target.value)
-                if (quickNoteStatus !== 'idle') setQuickNoteStatus('idle')
-              }}
-              placeholder="写点什么..."
-              className={`h-44 w-full resize-none rounded-lg border px-3 py-2 text-sm leading-relaxed outline-none xl:h-auto xl:min-h-0 xl:flex-1 ${inputBg}`}
-            />
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <div className={`text-xs ${quickNoteStatus === 'error' ? 'text-red-500' : subText}`}>
-                {quickNoteStatus === 'sending' && '发送中...'}
-                {quickNoteStatus === 'error' && '发送失败'}
               </div>
               <button
-                onClick={() => { sendQuickNote().catch(() => setQuickNoteStatus('error')) }}
-                disabled={!quickNote.trim() || quickNoteStatus === 'sending'}
-                className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs text-white transition-colors hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => onNavigate('goals')}
+                className={`inline-flex items-center gap-1 rounded-2xl px-4 py-2 text-sm transition-colors ${darkMode ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}
               >
-                发送
+                查看目标 <ArrowRight size={14} />
               </button>
             </div>
+
+            {goalsLoading ? (
+              <div className={`text-sm ${subText}`}>读取中...</div>
+            ) : !primaryGoal ? (
+              <div className={`rounded-[24px] border px-4 py-6 ${darkMode ? 'border-gray-800 bg-gray-950/60' : 'border-gray-100 bg-gray-50/80'}`}>
+                <div className={`text-base font-medium ${textH}`}>还没有当前主目标</div>
+                <p className={`mt-2 text-sm leading-6 ${text}`}>
+                  去目标页设置一个正在推进的目标后，这里会直接突出它的阶段、截止时间和当前状态。
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className={`rounded-[24px] border px-4 py-4 ${darkMode ? 'border-emerald-900/50 bg-gradient-to-br from-emerald-950/40 to-gray-950' : 'border-emerald-100 bg-gradient-to-br from-emerald-50 to-white'}`}>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className={`text-xs font-medium uppercase tracking-[0.16em] ${subText}`}>当前主目标</div>
+                      <div className={`mt-2 text-lg font-semibold ${textH}`}>{primaryGoal.title}</div>
+                      {primaryGoal.description && (
+                        <p className={`mt-2 max-w-xl text-sm leading-5 ${text}`}>{primaryGoal.description}</p>
+                      )}
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-medium ${darkMode ? 'bg-emerald-500/10 text-emerald-300' : 'bg-emerald-100 text-emerald-700'}`}>
+                      {primaryGoal.status === 'active' ? '进行中' : '已完成'}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className={`rounded-full px-3 py-1 text-xs ${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600 ring-1 ring-gray-100'}`}>
+                      {primaryGoal.goal_type === 'long' ? '长期目标' : '短期目标'}
+                    </span>
+                    <span className={`rounded-full px-3 py-1 text-xs ${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600 ring-1 ring-gray-100'}`}>
+                      截止 {formatDateLabel(primaryGoal.target_date)}
+                    </span>
+                  </div>
+                </div>
+
+                {remainingGoalsCount > 0 && (
+                  <div className={`flex items-center justify-between rounded-2xl px-4 py-2.5 text-sm ${darkMode ? 'bg-gray-950/70 text-gray-300' : 'bg-gray-50 text-gray-600'}`}>
+                    <span>还有 {remainingGoalsCount} 个目标处于进行中，已收成次级入口。</span>
+                    <button
+                      onClick={() => onNavigate('goals')}
+                      className={`inline-flex items-center gap-1 font-medium ${darkMode ? 'text-emerald-300' : 'text-emerald-700'}`}
+                    >
+                      全部目标 <ArrowRight size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </Card>
+
+          <Card darkMode={darkMode} className={darkMode ? 'p-5 shadow-none' : 'p-5 shadow-[0_20px_50px_-36px_rgba(99,102,241,0.25)]'}>
+            <div className="mb-4 flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className={`mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl ${darkMode ? 'bg-indigo-500/15 text-indigo-300' : 'bg-indigo-50 text-indigo-600'}`}>
+                  <ListTodo size={18} />
+                </div>
+                <div>
+                  <div className={`text-xs font-medium uppercase tracking-[0.18em] ${subText}`}>精选待办</div>
+                  <h2 className={`mt-1 text-base font-semibold ${textH}`}>任务</h2>
+                  <p className={`mt-1 text-sm ${text}`}>这里只露出最值得现在处理的 3 条任务，不把任务页整块搬回来。</p>
+                </div>
+              </div>
+              <button
+                onClick={() => onNavigate('tasks')}
+                className={`inline-flex items-center gap-1 rounded-2xl px-4 py-2 text-sm transition-colors ${darkMode ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-gray-50 text-gray-700 hover:bg-gray-100'}`}
+              >
+                查看全部任务 <ArrowRight size={14} />
+              </button>
+            </div>
+
+            {tasksLoading ? (
+              <div className={`text-sm ${subText}`}>读取中...</div>
+            ) : featuredTasks.length === 0 ? (
+              <div className={`rounded-[24px] border px-4 py-6 ${darkMode ? 'border-gray-800 bg-gray-950/60' : 'border-gray-100 bg-gray-50/80'}`}>
+                <div className={`text-base font-medium ${textH}`}>当前没有待处理任务</div>
+                <p className={`mt-2 text-sm leading-6 ${text}`}>
+                  你可以直接去任务页补任务，或者在右侧让助理帮你整理出下一步要执行的事项。
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {featuredTasks.map((task, index) => (
+                  <div
+                    key={task.id}
+                    className={`flex items-start justify-between gap-4 rounded-[20px] border px-4 py-3 ${darkMode ? 'border-gray-800 bg-gray-950/70' : 'border-gray-100 bg-gray-50/90'}`}
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ${darkMode ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-500 ring-1 ring-gray-100'}`}>
+                          {index + 1}
+                        </span>
+                        <div className={`truncate text-sm font-medium ${textH}`}>{task.title}</div>
+                      </div>
+                      <div className={`mt-1.5 pl-8 text-xs ${subText}`}>
+                        {task.due_date === today
+                          ? `今天${task.due_time ? ` · ${task.due_time}` : ''}`
+                          : task.due_date
+                          ? `${formatDateLabel(task.due_date)}${task.due_time ? ` · ${task.due_time}` : ''}`
+                          : '未设置日期'}
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 flex-col items-end gap-2">
+                      <span className={`rounded-full px-3 py-1 text-[11px] font-medium ${
+                        task.due_date === today
+                          ? darkMode
+                            ? 'bg-amber-500/10 text-amber-300'
+                            : 'bg-amber-50 text-amber-700'
+                          : task.priority === 'high'
+                          ? 'bg-red-500/10 text-red-500'
+                          : darkMode
+                          ? 'bg-gray-800 text-gray-300'
+                          : 'bg-white text-gray-500 ring-1 ring-gray-100'
+                      }`}>
+                        {task.due_date === today ? '今天' : task.priority === 'high' ? '高优先级' : '待处理'}
+                      </span>
+                      <span className={`text-[11px] ${subText}`}>{task.status === 'in_progress' ? '进行中' : '待开始'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
 
-        <AgentPanel
-          darkMode={darkMode}
-          fillHeight
-          onOpenFullPage={() => onNavigate('agent')}
-          onActionComplete={handleAgentActionComplete}
-        />
+        <div
+          className="min-h-0 overflow-hidden xl:self-start"
+          style={rightHeight ? { height: `${rightHeight}px` } : undefined}
+        >
+          <AgentPanel darkMode={darkMode} compact fillHeight />
+        </div>
       </div>
     </div>
   )

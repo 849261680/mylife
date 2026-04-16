@@ -1,6 +1,10 @@
 {
   "name": "mylife",
   "private": true,
+  "engines": {
+    "node": "20.x",
+    "pnpm": ">=10"
+  },
   "scripts": {
     "dev": "pnpm --parallel --filter './packages/*' dev",
     "build": "pnpm --filter '@mylife/shared' build && pnpm --parallel --filter './packages/*' build",
