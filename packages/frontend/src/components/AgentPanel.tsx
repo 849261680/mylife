@@ -235,7 +235,7 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
         </div>
       </div>
 
-      <div className={`grid gap-0 ${compact ? 'lg:grid-cols-[minmax(0,1fr)_260px]' : 'lg:grid-cols-[minmax(0,1fr)_288px]'} ${fillHeight ? 'xl:flex-1 xl:min-h-0' : ''}`}>
+      <div className={`${fillHeight ? 'xl:flex-1 xl:min-h-0 xl:flex xl:flex-col' : ''}`}>
         <section className={`min-w-0 ${fillHeight ? 'xl:flex xl:min-h-0 xl:flex-col' : ''}`}>
           {compact && (
             <div className="flex flex-wrap gap-2 px-5 pt-4">
@@ -302,25 +302,6 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
             {error && <div className="mt-2 text-xs text-red-500">{error}</div>}
           </form>
         </section>
-
-        <aside className={`${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'} border-t lg:border-l lg:border-t-0 ${fillHeight ? 'xl:flex xl:min-h-0 xl:flex-col' : ''}`}>
-          <div className={`border-b px-5 py-4 ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
-            <div className="flex items-center gap-2">
-              <Wrench size={15} className="text-[#ff4f00]" />
-              <h3 className={`text-sm font-semibold ${textH}`}>本轮操作</h3>
-            </div>
-          </div>
-          <div className={`space-y-3 px-5 py-4 ${fillHeight ? 'xl:flex-1 xl:overflow-y-auto' : ''}`}>
-            {visibleActions.length === 0 ? (
-              <div className={`text-sm ${subText}`}>这一轮还没有执行写操作。</div>
-            ) : visibleActions.map((action) => (
-              <div key={action.id} className={`rounded-[5px] border px-3 py-3 ${darkMode ? 'border-[#4a4440] bg-[#1e1a1a]/60' : 'border-[#c5c0b1] bg-[#eceae3]/80'}`}>
-                <div className={`text-sm font-medium ${textH}`}>{action.action_type}</div>
-                <div className={`mt-1 text-xs ${subText}`}>{new Date(action.created_at).toLocaleString('zh-CN')}</div>
-              </div>
-            ))}
-          </div>
-        </aside>
       </div>
     </div>
   )
