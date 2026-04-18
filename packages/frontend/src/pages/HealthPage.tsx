@@ -14,7 +14,7 @@ interface LineChartProps {
 
 function LineChart({ data, color, min, max, height = 80, darkMode }: LineChartProps) {
   if (data.length < 2) return (
-    <div className={`flex items-center justify-center text-xs ${darkMode ? 'text-gray-600' : 'text-gray-300'}`} style={{ height }}>
+    <div className={`flex items-center justify-center text-xs ${darkMode ? 'text-[#4a4440]' : 'text-[#c5c0b1]'}`} style={{ height }}>
       暂无数据
     </div>
   )
@@ -46,7 +46,7 @@ function LineChart({ data, color, min, max, height = 80, darkMode }: LineChartPr
         return (
           <g key={i}>
             <circle cx={x} cy={y} r="3" fill={color} />
-            <text x={x} y={h + 18} textAnchor="middle" fontSize="9" fill={darkMode ? '#6b7280' : '#9ca3af'}>
+            <text x={x} y={h + 18} textAnchor="middle" fontSize="9" fill={darkMode ? '#7a756c' : '#939084'}>
               {data[i].date.slice(5)}
             </text>
           </g>
@@ -71,9 +71,9 @@ export default function HealthPage({ darkMode }: PageProps) {
   const [createError, setCreateError] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
-  const textH   = darkMode ? 'text-white'    : 'text-gray-900'
-  const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
-  const cardBg  = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
+  const textH   = darkMode ? 'text-[#f0ebe3]'    : 'text-[#201515]'
+  const subText = darkMode ? 'text-[#7a756c]' : 'text-[#939084]'
+  const cardBg  = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
 
   const thirtyDaysAgo = new Date(Date.now() - 29 * 86400000).toISOString().slice(0, 10)
 
@@ -185,19 +185,19 @@ export default function HealthPage({ darkMode }: PageProps) {
       {/* Top stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: '当前体重', value: latestWeight ? `${latestWeight} kg` : '—', sub: latestWeightRecord?.date ?? '暂无体重记录', color: 'text-indigo-500', canDelete: Boolean(latestWeightRecord) },
-          { label: '30天变化', value: weightDiff ? `${Number(weightDiff) > 0 ? '+' : ''}${weightDiff} kg` : '—', sub: weightData.length >= 2 ? '持续追踪中' : '数据不足', color: Number(weightDiff) <= 0 ? 'text-emerald-500' : 'text-rose-500' },
-          { label: 'BMI', value: bmi ?? '—', sub: bmi ? (Number(bmi) < 18.5 ? '偏瘦' : Number(bmi) < 24 ? '正常' : '偏重') : '需要数据', color: 'text-emerald-500' },
-          { label: '距目标', value: latestWeight ? `${(Number(latestWeight) - TARGET_WEIGHT).toFixed(1)} kg` : '—', sub: `目标 ${TARGET_WEIGHT} kg`, color: 'text-purple-500' },
+          { label: '当前体重', value: latestWeight ? `${latestWeight} kg` : '—', sub: latestWeightRecord?.date ?? '暂无体重记录', color: 'text-[#ff4f00]', canDelete: Boolean(latestWeightRecord) },
+          { label: '30天变化', value: weightDiff ? `${Number(weightDiff) > 0 ? '+' : ''}${weightDiff} kg` : '—', sub: weightData.length >= 2 ? '持续追踪中' : '数据不足', color: Number(weightDiff) <= 0 ? 'text-emerald-600' : 'text-rose-600' },
+          { label: 'BMI', value: bmi ?? '—', sub: bmi ? (Number(bmi) < 18.5 ? '偏瘦' : Number(bmi) < 24 ? '正常' : '偏重') : '需要数据', color: 'text-emerald-600' },
+          { label: '距目标', value: latestWeight ? `${(Number(latestWeight) - TARGET_WEIGHT).toFixed(1)} kg` : '—', sub: `目标 ${TARGET_WEIGHT} kg`, color: 'text-amber-600' },
         ].map(item => (
-          <div key={item.label} className={`rounded-xl border p-4 ${cardBg}`}>
+          <div key={item.label} className={`rounded-[5px] border p-4 ${cardBg}`}>
             <div className={`text-xs ${subText} mb-1`}>{item.label}</div>
             <div className={`text-2xl font-bold ${item.color}`}>{item.value}</div>
             <div className={`text-xs mt-1 ${subText}`}>{item.sub}</div>
             {item.canDelete && (
               <button
                 onClick={() => handleDeleteMetric('weight')}
-                className={`mt-3 text-xs transition-colors ${darkMode ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'}`}
+                className={`mt-3 text-xs transition-colors ${darkMode ? 'text-[#7a756c] hover:text-red-400' : 'text-[#939084] hover:text-red-500'}`}
               >
                 删除
               </button>
@@ -209,27 +209,27 @@ export default function HealthPage({ darkMode }: PageProps) {
 
       <div className="grid grid-cols-2 gap-5">
         {/* Weight chart */}
-        <div className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className={`rounded-[5px] border p-5 ${cardBg}`}>
           <div className="flex items-center justify-between mb-1">
             <h2 className={`text-sm font-semibold ${textH}`}>体重记录</h2>
-            <button onClick={() => { setRecordingType('weight'); setCreateError(null) }} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+            <button onClick={() => { setRecordingType('weight'); setCreateError(null) }} className="flex items-center gap-1.5 bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors">
               <Plus size={13} />记录
             </button>
           </div>
           {weightDiff && (
             <div className={`flex items-center gap-2 mb-4 text-xs ${subText}`}>
-              <TrendingDown size={13} className="text-emerald-500" />
+              <TrendingDown size={13} className="text-emerald-600" />
               <span>较30天前 {Number(weightDiff) > 0 ? '+' : ''}{weightDiff} kg</span>
             </div>
           )}
-          <LineChart data={weightData} color="#6366f1" darkMode={darkMode} />
-          <div className={`mt-4 pt-4 border-t grid grid-cols-3 gap-2 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+          <LineChart data={weightData} color="#ff4f00" darkMode={darkMode} />
+          <div className={`mt-4 pt-4 border-t grid grid-cols-3 gap-2 ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             {[
               { label: '当前', value: latestWeight ? `${latestWeight} kg` : '—' },
               { label: '最低', value: weightData.length ? `${Math.min(...weightData.map(d => d.value)).toFixed(1)} kg` : '—' },
               { label: '最高', value: weightData.length ? `${Math.max(...weightData.map(d => d.value)).toFixed(1)} kg` : '—' },
             ].map(item => (
-              <div key={item.label} className={`text-center p-2 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+              <div key={item.label} className={`text-center p-2 rounded-[5px] ${darkMode ? 'bg-[#1e1a1a]' : 'bg-[#eceae3]'}`}>
                 <div className={`text-sm font-semibold ${textH}`}>{item.value}</div>
                 <div className={`text-xs ${subText}`}>{item.label}</div>
               </div>
@@ -238,19 +238,19 @@ export default function HealthPage({ darkMode }: PageProps) {
         </div>
 
         {/* Sleep chart */}
-        <div className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className={`rounded-[5px] border p-5 ${cardBg}`}>
           <div className="flex items-center justify-between mb-1">
             <h2 className={`text-sm font-semibold ${textH}`}>睡眠记录</h2>
             <div className="flex items-center gap-2">
               {latestSleepRecord && (
                 <button
                   onClick={() => handleDeleteMetric('sleep')}
-                  className={`text-xs transition-colors ${darkMode ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'}`}
+                  className={`text-xs transition-colors ${darkMode ? 'text-[#7a756c] hover:text-red-400' : 'text-[#939084] hover:text-red-500'}`}
                 >
                   删除最新
                 </button>
               )}
-              <button onClick={() => { setRecordingType('sleep'); setCreateError(null) }} className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors">
+              <button onClick={() => { setRecordingType('sleep'); setCreateError(null) }} className="flex items-center gap-1.5 bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors">
                 <Plus size={13} />记录
               </button>
             </div>
@@ -261,14 +261,14 @@ export default function HealthPage({ darkMode }: PageProps) {
               : '暂无睡眠数据'
             }
           </div>
-          <LineChart data={sleepData} color="#8b5cf6" min={4} max={10} darkMode={darkMode} />
-          <div className={`mt-4 pt-4 border-t grid grid-cols-3 gap-2 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+          <LineChart data={sleepData} color="#b5b2aa" min={4} max={10} darkMode={darkMode} />
+          <div className={`mt-4 pt-4 border-t grid grid-cols-3 gap-2 ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             {[
               { label: '最近', value: latestSleepHours ? `${latestSleepHours} h` : '—' },
               { label: '最少', value: sleepData.length ? `${Math.min(...sleepData.map(d => d.value)).toFixed(1)} h` : '—' },
               { label: '最多', value: sleepData.length ? `${Math.max(...sleepData.map(d => d.value)).toFixed(1)} h` : '—' },
             ].map(item => (
-              <div key={item.label} className={`text-center p-2 rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+              <div key={item.label} className={`text-center p-2 rounded-[5px] ${darkMode ? 'bg-[#1e1a1a]' : 'bg-[#eceae3]'}`}>
                 <div className={`text-sm font-semibold ${textH}`}>{item.value}</div>
                 <div className={`text-xs ${subText}`}>{item.label}</div>
               </div>
@@ -277,7 +277,7 @@ export default function HealthPage({ darkMode }: PageProps) {
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 ${cardBg}`}>
+      <div className={`rounded-[5px] border p-5 ${cardBg}`}>
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className={`text-sm font-semibold ${textH}`}>一日三餐</h2>
@@ -289,7 +289,7 @@ export default function HealthPage({ darkMode }: PageProps) {
             {latestMealsRecord && (
               <button
                 onClick={handleDeleteMeals}
-                className={`text-xs transition-colors ${darkMode ? 'text-gray-500 hover:text-red-400' : 'text-gray-400 hover:text-red-500'}`}
+                className={`text-xs transition-colors ${darkMode ? 'text-[#7a756c] hover:text-red-400' : 'text-[#939084] hover:text-red-500'}`}
               >
                 清空最新
               </button>
@@ -305,7 +305,7 @@ export default function HealthPage({ darkMode }: PageProps) {
             <button
               key={meal.key}
               onClick={() => startMealRecording(meal.key as MealType)}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors"
             >
               <Plus size={13} />{meal.label}
             </button>
@@ -315,7 +315,7 @@ export default function HealthPage({ darkMode }: PageProps) {
           <div className={`text-sm ${subText}`}>今天吃了什么、哪一顿没吃、或者简单备注菜品，都可以记在这里。</div>
         ) : (
           <div className="grid grid-cols-2 gap-4">
-            <div className={`rounded-xl p-4 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+            <div className={`rounded-[5px] p-4 ${darkMode ? 'bg-[#1e1a1a]' : 'bg-[#eceae3]'}`}>
               <div className={`text-xs mb-3 ${subText}`}>最新一天</div>
               <div className={`text-xs mb-3 ${subText}`}>{latestMealsRecord?.date}</div>
               <div className="space-y-3">
@@ -333,7 +333,7 @@ export default function HealthPage({ darkMode }: PageProps) {
             </div>
             <div className="space-y-3">
               {mealRecords.slice(0, 5).map((record) => (
-                <div key={record.date} className={`rounded-xl border p-4 ${darkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-100 bg-white'}`}>
+                <div key={record.date} className={`rounded-[5px] border p-4 ${darkMode ? 'border-[#4a4440] bg-[#2a2424]' : 'border-[#c5c0b1] bg-[#fffefb]'}`}>
                   <div className={`text-xs mb-2 ${subText}`}>{record.date}</div>
                   <div className="grid grid-cols-3 gap-3">
                     {[
@@ -355,24 +355,24 @@ export default function HealthPage({ darkMode }: PageProps) {
       </div>
 
       {recordingType && (
-        <form onSubmit={handleCreate} className={`rounded-xl border p-5 ${cardBg}`}>
+        <form onSubmit={handleCreate} className={`rounded-[5px] border p-5 ${cardBg}`}>
           <h2 className={`text-sm font-semibold ${textH} mb-4`}>
             {recordingType === 'weight' ? '记录体重' : recordingType === 'sleep' ? '记录睡眠' : `记录${mealType === 'breakfast' ? '早餐' : mealType === 'lunch' ? '午餐' : '晚餐'}`}
           </h2>
           <div className={`grid gap-3 ${recordingType === 'meal' ? 'grid-cols-1' : 'grid-cols-2'}`}>
-            <input type="date" value={date} onChange={event => setDate(event.target.value)} className={`rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`} />
+            <input type="date" value={date} onChange={event => setDate(event.target.value)} className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515]'}`} />
             {recordingType === 'weight' ? (
-              <input autoFocus value={weight} onChange={event => setWeight(event.target.value)} inputMode="decimal" placeholder="体重 kg" className={`rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
+              <input autoFocus value={weight} onChange={event => setWeight(event.target.value)} inputMode="decimal" placeholder="体重 kg" className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'}`} />
             ) : recordingType === 'meal' ? (
               <input
                 autoFocus
                 value={mealValue}
                 onChange={event => setMealValue(event.target.value)}
                 placeholder={`${mealType === 'breakfast' ? '早餐' : mealType === 'lunch' ? '午餐' : '晚餐'}吃了什么`}
-                className={`rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`}
+                className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'}`}
               />
             ) : (
-              <input autoFocus value={sleepHours} onChange={event => setSleepHours(event.target.value)} inputMode="decimal" placeholder="睡眠小时" className={`rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
+              <input autoFocus value={sleepHours} onChange={event => setSleepHours(event.target.value)} inputMode="decimal" placeholder="睡眠小时" className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'}`} />
             )}
           </div>
           {createError && <div className="mt-3 text-xs text-red-500">{createError}</div>}
@@ -386,11 +386,11 @@ export default function HealthPage({ darkMode }: PageProps) {
                     ? !sleepHours.trim()
                     : !mealValue.trim()
               }
-              className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs text-white disabled:opacity-50"
+              className="rounded-[4px] bg-[#ff4f00] px-3 py-1.5 text-xs text-[#fffefb] font-semibold disabled:opacity-50"
             >
               保存
             </button>
-            <button type="button" onClick={() => { setRecordingType(null); setMealType(null); setMealValue('') }} className={`rounded-lg border px-3 py-1.5 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>取消</button>
+            <button type="button" onClick={() => { setRecordingType(null); setMealType(null); setMealValue('') }} className={`rounded-[4px] border px-3 py-1.5 text-xs font-semibold ${darkMode ? 'border-[#4a4440] text-[#939084]' : 'border-[#c5c0b1] text-[#36342e]'}`}>取消</button>
           </div>
         </form>
       )}

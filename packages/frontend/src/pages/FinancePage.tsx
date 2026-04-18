@@ -6,7 +6,7 @@ import type { TransactionType } from '@mylife/shared'
 
 interface PageProps { darkMode: boolean }
 
-const CATEGORY_COLORS = ['bg-indigo-400', 'bg-purple-400', 'bg-pink-400', 'bg-amber-400', 'bg-sky-400', 'bg-emerald-400']
+const CATEGORY_COLORS = ['bg-[#ff4f00]', 'bg-amber-500', 'bg-rose-400', 'bg-sky-400', 'bg-emerald-400', 'bg-violet-400']
 
 export default function FinancePage({ darkMode }: PageProps) {
   const today = new Date().toISOString().slice(0, 10)
@@ -18,12 +18,12 @@ export default function FinancePage({ darkMode }: PageProps) {
   const [date, setDate] = useState(today)
   const [createError, setCreateError] = useState<string | null>(null)
 
-  const textH   = darkMode ? 'text-white'    : 'text-gray-900'
-  const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
-  const text    = darkMode ? 'text-gray-300' : 'text-gray-600'
-  const cardBg  = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
-  const hoverBg = darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
-  const rowBg   = darkMode ? 'bg-gray-800' : 'bg-gray-50'
+  const textH   = darkMode ? 'text-[#f0ebe3]'    : 'text-[#201515]'
+  const subText = darkMode ? 'text-[#7a756c]' : 'text-[#939084]'
+  const text    = darkMode ? 'text-[#c5c0b1]' : 'text-[#36342e]'
+  const cardBg  = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
+  const hoverBg = darkMode ? 'hover:bg-[#3a3434]' : 'hover:bg-[#eceae3]'
+  const rowBg   = darkMode ? 'bg-[#1e1a1a]' : 'bg-[#eceae3]'
 
   const thisMonth = new Date().toISOString().slice(0, 7)
   const { data: summary, refetch: refetchSummary } = useApi(() => financeApi.summary(thisMonth))
@@ -70,18 +70,18 @@ export default function FinancePage({ darkMode }: PageProps) {
     <div className="max-w-5xl mx-auto space-y-5">
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-4">
-        <div className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className={`rounded-[5px] border p-5 ${cardBg}`}>
           <div className={`text-xs ${subText} mb-1`}>本月收入</div>
           <div className="flex items-end justify-between">
-            <div className="text-2xl font-bold text-emerald-500">
+            <div className="text-2xl font-bold text-emerald-600">
               +¥{summary ? (summary.income / 100).toLocaleString() : '—'}
             </div>
           </div>
         </div>
-        <div className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className={`rounded-[5px] border p-5 ${cardBg}`}>
           <div className={`text-xs ${subText} mb-1`}>本月支出</div>
           <div className="flex items-end justify-between">
-            <div className="text-2xl font-bold text-rose-500">
+            <div className="text-2xl font-bold text-rose-600">
               -¥{summary ? (summary.expense / 100).toLocaleString() : '—'}
             </div>
             <div className={`flex items-center gap-1 text-xs ${subText}`}>
@@ -90,7 +90,7 @@ export default function FinancePage({ darkMode }: PageProps) {
             </div>
           </div>
         </div>
-        <div className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className={`rounded-[5px] border p-5 ${cardBg}`}>
           <div className={`text-xs ${subText} mb-1`}>本月结余</div>
           <div className="flex items-end justify-between">
             <div className={`text-2xl font-bold ${textH}`}>
@@ -107,7 +107,7 @@ export default function FinancePage({ darkMode }: PageProps) {
 
       <div className="grid grid-cols-3 gap-5">
         {/* Budget breakdown */}
-        <div className={`rounded-xl border p-5 ${cardBg}`}>
+        <div className={`rounded-[5px] border p-5 ${cardBg}`}>
           <div className="flex items-center justify-between mb-4">
             <h2 className={`text-sm font-semibold ${textH}`}>支出分类</h2>
           </div>
@@ -128,7 +128,7 @@ export default function FinancePage({ darkMode }: PageProps) {
                       )}
                     </div>
                   </div>
-                  <div className={`h-2 rounded-full overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                  <div className={`h-2 rounded-full overflow-hidden ${darkMode ? 'bg-[#3a3434]' : 'bg-[#eceae3]'}`}>
                     <div
                       className={`h-full rounded-full ${cat.over_budget ? 'bg-rose-400' : CATEGORY_COLORS[i % CATEGORY_COLORS.length]}`}
                       style={{ width: `${Math.min(cat.pct_of_total * 2, 100)}%` }}
@@ -146,19 +146,19 @@ export default function FinancePage({ darkMode }: PageProps) {
         </div>
 
         {/* Transactions */}
-        <div className={`col-span-2 rounded-xl border ${cardBg}`}>
-          <div className={`flex items-center justify-between px-5 py-4 border-b ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+        <div className={`col-span-2 rounded-[5px] border ${cardBg}`}>
+          <div className={`flex items-center justify-between px-5 py-4 border-b ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             <h2 className={`text-sm font-semibold ${textH}`}>本月流水</h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={() => startCreate('expense')}
-                className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 bg-rose-600 hover:bg-rose-700 text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors"
               >
                 <Plus size={13} />支出
               </button>
               <button
                 onClick={() => startCreate('income')}
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors"
               >
                 <Plus size={13} />收入
               </button>
@@ -166,18 +166,18 @@ export default function FinancePage({ darkMode }: PageProps) {
           </div>
 
           {isCreating && (
-            <form onSubmit={handleCreate} className={`grid grid-cols-2 gap-3 px-5 py-4 border-b ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
-              <div className={`rounded-lg border px-3 py-2 text-sm ${type === 'income' ? 'text-emerald-500' : 'text-rose-500'} ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+            <form onSubmit={handleCreate} className={`grid grid-cols-2 gap-3 px-5 py-4 border-b ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
+              <div className={`rounded-[5px] border px-3 py-2 text-sm ${type === 'income' ? 'text-emerald-600' : 'text-rose-600'} ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440]' : 'bg-[#eceae3] border-[#c5c0b1]'}`}>
                 {type === 'income' ? '收入' : '支出'}
               </div>
-              <input value={amount} onChange={event => setAmount(event.target.value)} inputMode="decimal" placeholder="金额（元）" className={`rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
-              <input value={category} onChange={event => setCategory(event.target.value)} placeholder="分类" className={`rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
-              <input type="date" value={date} onChange={event => setDate(event.target.value)} className={`rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`} />
-              <input value={note} onChange={event => setNote(event.target.value)} placeholder="备注（可选）" className={`col-span-2 rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`} />
+              <input value={amount} onChange={event => setAmount(event.target.value)} inputMode="decimal" placeholder="金额（元）" className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'}`} />
+              <input value={category} onChange={event => setCategory(event.target.value)} placeholder="分类" className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'}`} />
+              <input type="date" value={date} onChange={event => setDate(event.target.value)} className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515]'}`} />
+              <input value={note} onChange={event => setNote(event.target.value)} placeholder="备注（可选）" className={`col-span-2 rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'}`} />
               {createError && <div className="col-span-2 text-xs text-red-500">{createError}</div>}
               <div className="col-span-2 flex gap-2">
-                <button type="submit" disabled={!amount || !category.trim()} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs text-white disabled:opacity-50">保存</button>
-                <button type="button" onClick={() => setIsCreating(false)} className={`rounded-lg border px-3 py-1.5 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>取消</button>
+                <button type="submit" disabled={!amount || !category.trim()} className="rounded-[4px] bg-[#ff4f00] px-3 py-1.5 text-xs text-[#fffefb] font-semibold disabled:opacity-50">保存</button>
+                <button type="button" onClick={() => setIsCreating(false)} className={`rounded-[4px] border px-3 py-1.5 text-xs font-semibold ${darkMode ? 'border-[#4a4440] text-[#939084]' : 'border-[#c5c0b1] text-[#36342e]'}`}>取消</button>
               </div>
             </form>
           )}
@@ -185,7 +185,7 @@ export default function FinancePage({ darkMode }: PageProps) {
           {loading ? (
             <div className="p-4 space-y-3">
               {[1,2,3,4,5].map(i => (
-                <div key={i} className={`h-12 rounded-lg animate-pulse ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`} />
+                <div key={i} className={`h-12 rounded-[5px] animate-pulse ${darkMode ? 'bg-[#3a3434]' : 'bg-[#eceae3]'}`} />
               ))}
             </div>
           ) : (transactions?.length ?? 0) === 0 ? (
@@ -194,10 +194,10 @@ export default function FinancePage({ darkMode }: PageProps) {
               本月还没有记录，点击「支出」或「收入」开始吧
             </div>
           ) : (
-            <div className={`divide-y ${darkMode ? 'divide-gray-800' : 'divide-gray-50'}`}>
+            <div className={`divide-y ${darkMode ? 'divide-[#4a4440]' : 'divide-[#c5c0b1]'}`}>
               {(transactions ?? []).slice(0, 10).map(t => (
                 <div key={t.id} className={`flex items-center gap-4 px-5 py-3 transition-colors ${hoverBg}`}>
-                  <div className={`w-9 h-9 rounded-xl ${rowBg} flex items-center justify-center text-lg flex-shrink-0`}>
+                  <div className={`w-9 h-9 rounded-[5px] ${rowBg} flex items-center justify-center text-lg flex-shrink-0`}>
                     {t.type === 'income' ? '💰' : t.category === '餐饮' ? '🍽️' : t.category === '交通' ? '🚇' : t.category === '购物' ? '🛍️' : '💸'}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -205,7 +205,7 @@ export default function FinancePage({ darkMode }: PageProps) {
                     <div className={`text-xs ${subText}`}>{t.category} · {t.date}</div>
                   </div>
                   <div className={`text-sm font-semibold flex items-center gap-1 ${
-                    t.type === 'income' ? 'text-emerald-500' : t.type === 'expense' ? 'text-rose-500' : 'text-amber-500'
+                    t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-rose-600' : 'text-amber-500'
                   }`}>
                     {t.type === 'income' ? <ArrowDownLeft size={13} /> : <ArrowUpRight size={13} />}
                     {t.type === 'income' ? '+' : '-'}¥{Math.abs(t.amount / 100).toLocaleString()}

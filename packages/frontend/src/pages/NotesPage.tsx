@@ -32,13 +32,12 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
   const [notebookError, setNotebookError] = useState<string | null>(null)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const textH = darkMode ? 'text-white' : 'text-gray-900'
-  const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
-  const text = darkMode ? 'text-gray-300' : 'text-gray-600'
-  const cardBg = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
-  const hoverBg = darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
-  const activeBg = darkMode ? 'bg-gray-800 text-white' : 'bg-indigo-50 text-indigo-600'
-  const inputBg = darkMode ? 'bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-700 placeholder-gray-400'
+  const textH = darkMode ? 'text-[#f0ebe3]' : 'text-[#201515]'
+  const subText = darkMode ? 'text-[#7a756c]' : 'text-[#939084]'
+  const text = darkMode ? 'text-[#c5c0b1]' : 'text-[#36342e]'
+  const cardBg = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
+  const hoverBg = darkMode ? 'hover:bg-[#3a3434]' : 'hover:bg-[#eceae3]'
+  const inputBg = darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#c5c0b1] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'
 
   const { data: nbData, refetch: refetchNbs } = useApi(() => notesApi.notebooks())
   const { data: noteList, refetch: refetchNotes } = useApi(
@@ -74,7 +73,7 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
     const nb = activeNotebook !== 'all' ? activeNotebook : notebooks[0]?.id
     if (!nb) {
       // Need to create a default notebook first
-      const newNb = await notesApi.createNotebook('我的笔记', 'bg-indigo-500')
+      const newNb = await notesApi.createNotebook('我的笔记', 'bg-[#ff4f00]')
       const note = await notesApi.create({ notebook_id: newNb.id, title: '新建笔记', content: '' })
       setActiveNotebook(newNb.id)
       void openNote(note)
@@ -93,7 +92,7 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
 
     try {
       setNotebookError(null)
-      const notebook = await notesApi.createNotebook(name, 'bg-indigo-500')
+      const notebook = await notesApi.createNotebook(name, 'bg-[#ff4f00]')
       setNewNotebookName('')
       setIsCreatingNotebook(false)
       setActiveNotebook(notebook.id)
@@ -137,14 +136,15 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
   return (
     <div className="flex gap-4 max-w-6xl mx-auto h-[calc(100vh-9rem)]">
       {/* Notebook list */}
-      <div className={`w-40 flex-shrink-0 rounded-xl border p-3 h-fit ${cardBg}`}>
+      <div className={`w-40 flex-shrink-0 rounded-[5px] border p-3 h-fit ${cardBg}`}>
         <div className={`text-xs font-semibold ${subText} px-2 mb-2 uppercase tracking-wide`}>笔记本</div>
         <div className="space-y-0.5">
           <button
             onClick={() => setActiveNotebook('all')}
-            className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm transition-colors ${
-              activeNotebook === 'all' ? activeBg : `${text} ${hoverBg}`
+            className={`w-full flex items-center justify-between px-2.5 py-2 rounded-[5px] text-sm transition-all ${
+              activeNotebook === 'all' ? 'text-[#ff4f00] font-semibold' : `${text} ${hoverBg}`
             }`}
+            style={activeNotebook === 'all' ? { boxShadow: 'rgb(255, 79, 0) 0px -4px 0px 0px inset' } : undefined}
           >
             <div className="flex items-center gap-2">
               <FolderOpen size={12} />
@@ -157,9 +157,10 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
             <button
               key={nb.id}
               onClick={() => setActiveNotebook(nb.id)}
-              className={`group w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-sm transition-colors ${
-                activeNotebook === nb.id ? activeBg : `${text} ${hoverBg}`
+              className={`group w-full flex items-center justify-between px-2.5 py-2 rounded-[5px] text-sm transition-all ${
+                activeNotebook === nb.id ? 'text-[#ff4f00] font-semibold' : `${text} ${hoverBg}`
               }`}
+              style={activeNotebook === nb.id ? { boxShadow: 'rgb(255, 79, 0) 0px -4px 0px 0px inset' } : undefined}
             >
               <div className="flex items-center gap-2 min-w-0">
                 <div className={`w-2 h-2 rounded-full ${nb.color}`} />
@@ -173,7 +174,7 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
                     event.stopPropagation()
                     void handleDeleteNotebook(nb)
                   }}
-                  className={`rounded-md p-1 opacity-0 transition-opacity group-hover:opacity-100 ${darkMode ? 'hover:bg-gray-700 hover:text-red-400' : 'hover:bg-white hover:text-red-500'}`}
+                  className={`rounded-[4px] p-1 opacity-0 transition-opacity group-hover:opacity-100 ${darkMode ? 'hover:bg-[#4a4440] hover:text-red-400' : 'hover:bg-[#fffefb] hover:text-red-500'}`}
                   aria-label={`删除${nb.name}`}
                 >
                   <Trash2 size={11} />
@@ -182,7 +183,7 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
             </button>
           ))}
         </div>
-        <div className={`mt-3 pt-3 border-t ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+        <div className={`mt-3 pt-3 border-t ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
           {isCreatingNotebook ? (
             <div className="space-y-2">
               <input
@@ -194,18 +195,18 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
                   if (event.key === 'Escape') setIsCreatingNotebook(false)
                 }}
                 placeholder="笔记本名称"
-                className={`w-full rounded-lg border px-2 py-1.5 text-xs outline-none ${inputBg}`}
+                className={`w-full rounded-[5px] border px-2 py-1.5 text-xs outline-none focus:border-[#ff4f00] ${inputBg}`}
               />
               {notebookError && <div className="text-xs text-red-500">{notebookError}</div>}
               <div className="flex gap-2">
-                <button type="button" onClick={handleCreateNotebook} className="rounded-lg bg-indigo-600 px-2 py-1 text-xs text-white">保存</button>
-                <button type="button" onClick={() => setIsCreatingNotebook(false)} className={`rounded-lg border px-2 py-1 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>取消</button>
+                <button type="button" onClick={handleCreateNotebook} className="rounded-[4px] bg-[#ff4f00] px-2 py-1 text-xs text-[#fffefb] font-semibold">保存</button>
+                <button type="button" onClick={() => setIsCreatingNotebook(false)} className={`rounded-[4px] border px-2 py-1 text-xs font-semibold ${darkMode ? 'border-[#4a4440] text-[#939084]' : 'border-[#c5c0b1] text-[#36342e]'}`}>取消</button>
               </div>
             </div>
           ) : (
             <button
               onClick={() => { setIsCreatingNotebook(true); setNotebookError(null) }}
-              className={`w-full flex items-center gap-1.5 px-2.5 py-2 rounded-lg text-xs text-indigo-500 transition-colors ${darkMode ? 'hover:bg-indigo-900/20' : 'hover:bg-indigo-50'}`}
+              className={`w-full flex items-center gap-1.5 px-2.5 py-2 rounded-[5px] text-xs text-[#ff4f00] transition-colors ${darkMode ? 'hover:bg-[#3a2820]' : 'hover:bg-[#eceae3]'}`}
             >
               <Plus size={12} /><span>新建笔记本</span>
             </button>
@@ -214,21 +215,21 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
       </div>
 
       {/* Notes list */}
-      <div className={`w-64 flex-shrink-0 rounded-xl border flex flex-col ${cardBg}`}>
-        <div className={`p-3 border-b ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+      <div className={`w-64 flex-shrink-0 rounded-[5px] border flex flex-col ${cardBg}`}>
+        <div className={`p-3 border-b ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
           <div className="relative mb-2">
-            <Search size={12} className={`absolute left-2.5 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+            <Search size={12} className={`absolute left-2.5 top-1/2 -translate-y-1/2 ${darkMode ? 'text-[#7a756c]' : 'text-[#939084]'}`} />
             <input
               type="text"
               placeholder="搜索笔记..."
               value={searchQ}
               onChange={e => setSearchQ(e.target.value)}
-              className={`w-full pl-7 pr-2 py-1.5 text-xs rounded-lg border outline-none ${inputBg}`}
+              className={`w-full pl-7 pr-2 py-1.5 text-xs rounded-[5px] border outline-none focus:border-[#ff4f00] ${inputBg}`}
             />
           </div>
           <button
             onClick={handleNewNote}
-            className="w-full flex items-center gap-1.5 text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg transition-colors justify-center"
+            className="w-full flex items-center gap-1.5 text-xs bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] font-semibold px-3 py-1.5 rounded-[4px] transition-colors justify-center"
           >
             <Plus size={12} />新建笔记
           </button>
@@ -243,9 +244,9 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
             <button
               key={note.id}
               onClick={() => openNote(note)}
-              className={`w-full text-left p-3 border-b transition-colors ${darkMode ? 'border-gray-800' : 'border-gray-50'} ${
+              className={`w-full text-left p-3 border-b transition-colors ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'} ${
                 activeNote?.id === note.id
-                  ? darkMode ? 'bg-gray-800' : 'bg-indigo-50'
+                  ? darkMode ? 'bg-[#3a2820]' : 'bg-[#eceae3]'
                   : hoverBg
               }`}
             >
@@ -257,7 +258,7 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
               <div className="flex items-center justify-between mt-1.5">
                 <div className="flex gap-1">
                   {note.tags.slice(0, 2).map(tag => (
-                    <span key={tag} className={`text-xs px-1 py-0.5 rounded ${darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                    <span key={tag} className={`text-xs px-1 py-0.5 rounded-[3px] ${darkMode ? 'bg-[#3a3434] text-[#939084]' : 'bg-[#eceae3] text-[#939084]'}`}>
                       {tag}
                     </span>
                   ))}
@@ -271,8 +272,8 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
 
       {/* Note editor */}
       {activeNote ? (
-        <div className={`flex-1 rounded-xl border flex flex-col ${cardBg}`}>
-          <div className={`flex items-center justify-between px-6 py-4 border-b ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+        <div className={`flex-1 rounded-[5px] border flex flex-col ${cardBg}`}>
+          <div className={`flex items-center justify-between px-6 py-4 border-b ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             <input
               type="text"
               value={editTitle}
@@ -288,12 +289,12 @@ export default function NotesPage({ darkMode, globalSearch = '' }: PageProps) {
               value={editContent}
               onChange={e => setEditContent(e.target.value)}
               placeholder="开始写点什么..."
-              className={`w-full h-full bg-transparent border-none outline-none resize-none text-sm leading-relaxed ${text} placeholder-gray-400`}
+              className={`w-full h-full bg-transparent border-none outline-none resize-none text-sm leading-relaxed ${text} placeholder-[#939084]`}
             />
           </div>
         </div>
       ) : (
-        <div className={`flex-1 rounded-xl border flex items-center justify-center ${cardBg}`}>
+        <div className={`flex-1 rounded-[5px] border flex items-center justify-center ${cardBg}`}>
           <div className={`text-center ${subText}`}>
             <div className="text-4xl mb-3">📝</div>
             <p className="text-sm">选择一篇笔记开始编辑</p>

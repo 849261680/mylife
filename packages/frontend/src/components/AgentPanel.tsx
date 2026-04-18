@@ -33,23 +33,23 @@ function MarkdownMessage({ content, darkMode }: { content: string; darkMode: boo
           ol: ({ children }) => <ol className="my-2 list-decimal pl-5">{children}</ol>,
           li: ({ children }) => <li className="my-1">{children}</li>,
           a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noreferrer" className="text-emerald-500 underline underline-offset-2">
+            <a href={href} target="_blank" rel="noreferrer" className="text-[#ff4f00] underline underline-offset-2">
               {children}
             </a>
           ),
           code: (props) => {
             const { children } = props
             return (props as { inline?: boolean }).inline
-              ? <code className={`rounded px-1 py-0.5 font-mono text-[0.9em] ${darkMode ? 'bg-gray-900 text-emerald-200' : 'bg-white/70 text-emerald-700'}`}>{children}</code>
+              ? <code className={`rounded-[3px] px-1 py-0.5 font-mono text-[0.9em] ${darkMode ? 'bg-[#1e1a1a] text-amber-200' : 'bg-[#eceae3] text-[#ff4f00]'}`}>{children}</code>
               : <code className="font-mono text-[0.9em]">{children}</code>
           },
           pre: ({ children }) => (
-            <pre className={`my-3 overflow-x-auto rounded-xl border p-3 ${darkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-200 bg-white/80'}`}>
+            <pre className={`my-3 overflow-x-auto rounded-[5px] border p-3 ${darkMode ? 'border-[#4a4440] bg-[#1e1a1a]' : 'border-[#c5c0b1] bg-[#eceae3]'}`}>
               {children}
             </pre>
           ),
           blockquote: ({ children }) => (
-            <blockquote className={`my-3 border-l-2 pl-3 italic ${darkMode ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-600'}`}>
+            <blockquote className={`my-3 border-l-2 pl-3 italic ${darkMode ? 'border-[#4a4440] text-[#939084]' : 'border-[#c5c0b1] text-[#939084]'}`}>
               {children}
             </blockquote>
           ),
@@ -70,12 +70,12 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
   const [latestActions, setLatestActions] = useState<AgentAction[]>([])
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
-  const textH = darkMode ? 'text-white' : 'text-gray-900'
-  const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
-  const cardBg = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
-  const inputBg = darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
-  const assistantBubble = darkMode ? 'bg-gray-800 text-gray-200' : 'bg-gray-100 text-gray-800'
-  const userBubble = compact ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white'
+  const textH = darkMode ? 'text-[#f0ebe3]' : 'text-[#201515]'
+  const subText = darkMode ? 'text-[#7a756c]' : 'text-[#939084]'
+  const cardBg = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
+  const inputBg = darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'
+  const assistantBubble = darkMode ? 'bg-[#3a3434] text-[#c5c0b1]' : 'bg-[#eceae3] text-[#36342e]'
+  const userBubble = 'bg-[#ff4f00] text-[#fffefb]'
   const visibleMessages = compact ? messages.slice(-6) : messages
   const visibleActions = compact ? latestActions.slice(0, 3) : latestActions
   const messageAreaClass = fillHeight
@@ -207,10 +207,10 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
   }
 
   return (
-    <div className={`rounded-xl border ${cardBg} ${fillHeight ? 'xl:flex xl:h-full xl:min-h-0 xl:flex-col' : ''}`}>
-      <div className={`flex items-center justify-between border-b px-5 py-4 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+    <div className={`rounded-[5px] border ${cardBg} ${fillHeight ? 'xl:flex xl:h-full xl:min-h-0 xl:flex-col' : ''}`}>
+      <div className={`flex items-center justify-between border-b px-5 py-4 ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-500">
+          <div className="flex h-8 w-8 items-center justify-center rounded-[5px] bg-[#ff4f00]/15 text-[#ff4f00]">
             <Sparkles size={16} />
           </div>
           <div>
@@ -227,7 +227,7 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
           {compact && onOpenFullPage && (
             <button
               onClick={onOpenFullPage}
-              className={`flex items-center gap-1 text-xs transition-colors ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
+              className={`flex items-center gap-1 text-xs transition-colors ${darkMode ? 'text-[#7a756c] hover:text-[#c5c0b1]' : 'text-[#939084] hover:text-[#36342e]'}`}
             >
               完整视图 <ArrowRight size={11} />
             </button>
@@ -244,7 +244,7 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
                   key={prompt}
                   onClick={() => { sendMessage(prompt).catch(() => undefined) }}
                   disabled={sending}
-                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors disabled:opacity-50 ${darkMode ? 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600' : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300'}`}
+                  className={`rounded-full border px-3 py-1.5 text-xs transition-colors disabled:opacity-50 ${darkMode ? 'border-[#4a4440] bg-[#1e1a1a] text-[#c5c0b1] hover:border-[#939084]' : 'border-[#c5c0b1] bg-[#fffdf9] text-[#36342e] hover:border-[#939084]'}`}
                 >
                   {prompt}
                 </button>
@@ -277,18 +277,18 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
             ))}
           </div>
 
-          <form onSubmit={handleSubmit} className={`border-t px-5 py-4 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+          <form onSubmit={handleSubmit} className={`border-t px-5 py-4 ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             <div className="relative">
               <textarea
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 placeholder={compact ? '让今日助理整理安排、补任务或创建事件…' : '给 Agent 下达指令，比如：帮我创建一个明天 14:00 的事件，并整理今天的待办。'}
-                className={`${compact ? 'h-24' : 'h-28'} w-full resize-none rounded-xl border px-3 py-3 pr-28 text-sm outline-none ${inputBg}`}
+                className={`${compact ? 'h-24' : 'h-28'} w-full resize-none rounded-[5px] border px-3 py-3 pr-28 text-sm outline-none focus:border-[#ff4f00] ${inputBg}`}
               />
               <button
                 type="submit"
                 disabled={sending || !draft.trim()}
-                className="absolute bottom-3 right-3 rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+                className="absolute bottom-3 right-3 rounded-[4px] bg-[#ff4f00] px-4 py-2 text-sm text-[#fffefb] font-semibold transition-colors hover:bg-[#e64700] disabled:opacity-50"
               >
                 {sending ? '生成中...' : '发送'}
               </button>
@@ -297,10 +297,10 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
           </form>
         </section>
 
-        <aside className={`${darkMode ? 'border-gray-800' : 'border-gray-100'} border-t lg:border-l lg:border-t-0 ${fillHeight ? 'xl:flex xl:min-h-0 xl:flex-col' : ''}`}>
-          <div className={`border-b px-5 py-4 ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+        <aside className={`${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'} border-t lg:border-l lg:border-t-0 ${fillHeight ? 'xl:flex xl:min-h-0 xl:flex-col' : ''}`}>
+          <div className={`border-b px-5 py-4 ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             <div className="flex items-center gap-2">
-              <Wrench size={15} className="text-emerald-500" />
+              <Wrench size={15} className="text-[#ff4f00]" />
               <h3 className={`text-sm font-semibold ${textH}`}>本轮操作</h3>
             </div>
           </div>
@@ -308,7 +308,7 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
             {visibleActions.length === 0 ? (
               <div className={`text-sm ${subText}`}>这一轮还没有执行写操作。</div>
             ) : visibleActions.map((action) => (
-              <div key={action.id} className={`rounded-lg border px-3 py-3 ${darkMode ? 'border-gray-800 bg-gray-900/60' : 'border-gray-100 bg-gray-50/80'}`}>
+              <div key={action.id} className={`rounded-[5px] border px-3 py-3 ${darkMode ? 'border-[#4a4440] bg-[#1e1a1a]/60' : 'border-[#c5c0b1] bg-[#eceae3]/80'}`}>
                 <div className={`text-sm font-medium ${textH}`}>{action.action_type}</div>
                 <div className={`mt-1 text-xs ${subText}`}>{new Date(action.created_at).toLocaleString('zh-CN')}</div>
               </div>

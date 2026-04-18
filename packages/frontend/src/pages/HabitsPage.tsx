@@ -19,7 +19,7 @@ const HABIT_COLOR_MAP: Record<string, string> = {
 }
 
 function resolveHabitColor(colorClass: string) {
-  return HABIT_COLOR_MAP[colorClass] ?? '#f97316'
+  return HABIT_COLOR_MAP[colorClass] ?? '#ff4f00'
 }
 
 function Heatmap({
@@ -37,7 +37,7 @@ function Heatmap({
   }
 
   const baseColor = resolveHabitColor(colorClass)
-  const emptyColor = darkMode ? '#1f2937' : '#f3f4f6'
+  const emptyColor = darkMode ? '#3a3434' : '#eceae3'
 
   return (
     <div className="space-y-2">
@@ -96,7 +96,7 @@ function Heatmap({
 }
 
 function subtleText(darkMode: boolean) {
-  return darkMode ? 'text-gray-500' : 'text-gray-400'
+  return darkMode ? 'text-[#7a756c]' : 'text-[#939084]'
 }
 
 export default function HabitsPage({ darkMode }: PageProps) {
@@ -105,9 +105,9 @@ export default function HabitsPage({ darkMode }: PageProps) {
   const [newIcon, setNewIcon] = useState('✅')
   const [createError, setCreateError] = useState<string | null>(null)
 
-  const textH   = darkMode ? 'text-white'    : 'text-gray-900'
-  const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
-  const cardBg  = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
+  const textH   = darkMode ? 'text-[#f0ebe3]'    : 'text-[#201515]'
+  const subText = darkMode ? 'text-[#7a756c]' : 'text-[#939084]'
+  const cardBg  = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
   const recentDays = Array.from({ length: 7 }, (_, index) => {
     const date = new Date()
     date.setDate(date.getDate() - (6 - index))
@@ -166,26 +166,26 @@ export default function HabitsPage({ darkMode }: PageProps) {
       <div className="grid grid-cols-3 gap-4">
         {[
           {
-            icon: Flame, label: '最长连续', color: 'text-orange-500',
-            bg: darkMode ? 'bg-orange-900/20' : 'bg-orange-50',
+            icon: Flame, label: '最长连续', color: 'text-[#ff4f00]',
+            bg: darkMode ? 'bg-[#3a2820]' : 'bg-[#eceae3]',
             value: maxStreak > 0 ? `${maxStreak} 天` : '—',
             sub: topStreakHabit?.name ?? '暂无数据',
           },
           {
-            icon: TrendingUp, label: '本月完成率', color: 'text-indigo-500',
-            bg: darkMode ? 'bg-indigo-900/20' : 'bg-indigo-50',
+            icon: TrendingUp, label: '本月完成率', color: 'text-[#ff4f00]',
+            bg: darkMode ? 'bg-[#3a2820]' : 'bg-[#eceae3]',
             value: `${avgCompletion}%`,
             sub: '习惯平均完成率',
           },
           {
-            icon: Award, label: '总打卡次数', color: 'text-emerald-500',
-            bg: darkMode ? 'bg-emerald-900/20' : 'bg-emerald-50',
+            icon: Award, label: '总打卡次数', color: 'text-[#ff4f00]',
+            bg: darkMode ? 'bg-[#3a2820]' : 'bg-[#eceae3]',
             value: `${totalLogs} 次`,
             sub: `共 ${habits?.length ?? 0} 个习惯`,
           },
         ].map(({ icon: Icon, label, color, bg, value, sub }) => (
-          <div key={label} className={`rounded-xl border p-4 ${cardBg}`}>
-            <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center mb-3`}>
+          <div key={label} className={`rounded-[5px] border p-4 ${cardBg}`}>
+            <div className={`w-8 h-8 rounded-[5px] ${bg} flex items-center justify-center mb-3`}>
               <Icon size={16} className={color} />
             </div>
             <div className={`text-xl font-bold ${textH}`}>{value}</div>
@@ -196,37 +196,37 @@ export default function HabitsPage({ darkMode }: PageProps) {
       </div>
 
       {/* Habits list */}
-      <div className={`rounded-xl border ${cardBg}`}>
-        <div className={`flex items-center justify-between px-5 py-4 border-b ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+      <div className={`rounded-[5px] border ${cardBg}`}>
+        <div className={`flex items-center justify-between px-5 py-4 border-b ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
           <h2 className={`text-sm font-semibold ${textH}`}>我的习惯</h2>
           <button
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors"
           >
             <Plus size={13} />添加习惯
           </button>
         </div>
 
         {isCreating && (
-          <form onSubmit={handleCreate} className={`flex flex-col gap-3 px-5 py-4 border-b ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+          <form onSubmit={handleCreate} className={`flex flex-col gap-3 px-5 py-4 border-b ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             <div className="flex gap-2">
               <input
                 value={newIcon}
                 onChange={event => setNewIcon(event.target.value)}
-                className={`w-14 rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-gray-900'}`}
+                className={`w-14 rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515]'}`}
               />
               <input
                 autoFocus
                 value={newName}
                 onChange={event => setNewName(event.target.value)}
                 placeholder="习惯名称"
-                className={`flex-1 rounded-lg border px-3 py-2 text-sm outline-none ${darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'}`}
+                className={`flex-1 rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'}`}
               />
             </div>
             {createError && <div className="text-xs text-red-500">{createError}</div>}
             <div className="flex gap-2">
-              <button type="submit" disabled={!newName.trim()} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs text-white disabled:opacity-50">保存</button>
-              <button type="button" onClick={() => setIsCreating(false)} className={`rounded-lg border px-3 py-1.5 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>取消</button>
+              <button type="submit" disabled={!newName.trim()} className="rounded-[4px] bg-[#ff4f00] px-3 py-1.5 text-xs text-[#fffefb] font-semibold disabled:opacity-50">保存</button>
+              <button type="button" onClick={() => setIsCreating(false)} className={`rounded-[4px] border px-3 py-1.5 text-xs font-semibold ${darkMode ? 'border-[#4a4440] text-[#939084]' : 'border-[#c5c0b1] text-[#36342e]'}`}>取消</button>
             </div>
           </form>
         )}
@@ -234,7 +234,7 @@ export default function HabitsPage({ darkMode }: PageProps) {
         {loading ? (
           <div className="p-5 space-y-4">
             {[1,2,3].map(i => (
-              <div key={i} className={`h-24 rounded-xl animate-pulse ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`} />
+              <div key={i} className={`h-24 rounded-[5px] animate-pulse ${darkMode ? 'bg-[#3a3434]' : 'bg-[#eceae3]'}`} />
             ))}
           </div>
         ) : (habits?.length ?? 0) === 0 ? (
@@ -243,7 +243,7 @@ export default function HabitsPage({ darkMode }: PageProps) {
             还没有习惯，点击「添加习惯」开始打卡吧
           </div>
         ) : (
-          <div className={`divide-y ${darkMode ? 'divide-gray-800' : 'divide-gray-50'}`}>
+          <div className={`divide-y ${darkMode ? 'divide-[#4a4440]' : 'divide-[#c5c0b1]'}`}>
             {(habits ?? []).map(habit => {
               const pct = Math.min(Math.round((habit.total_this_month / habit.target_per_month) * 100), 100)
               return (
@@ -251,14 +251,14 @@ export default function HabitsPage({ darkMode }: PageProps) {
                   <div className="flex items-start gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-3">
-                        <div className={`w-9 h-9 ${habit.color} rounded-xl flex items-center justify-center text-lg`}>
+                        <div className={`w-9 h-9 ${habit.color} rounded-[5px] flex items-center justify-center text-lg`}>
                           {habit.icon}
                         </div>
                         <div>
                           <div className={`text-sm font-medium ${textH}`}>{habit.name}</div>
                           <div className={`text-xs mt-0.5 ${subText}`}>
                             {habit.streak > 0
-                              ? <span className="text-orange-500 font-medium">🔥 连续 {habit.streak} 天</span>
+                              ? <span className="text-[#ff4f00] font-medium">🔥 连续 {habit.streak} 天</span>
                               : <span>连续已中断</span>
                             }
                             <span className="mx-1.5">·</span>
@@ -267,7 +267,7 @@ export default function HabitsPage({ darkMode }: PageProps) {
                         </div>
                       </div>
 
-                      <div className={`h-1.5 rounded-full overflow-hidden mb-3 ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                      <div className={`h-1.5 rounded-full overflow-hidden mb-3 ${darkMode ? 'bg-[#3a3434]' : 'bg-[#eceae3]'}`}>
                         <div className={`h-full rounded-full ${habit.color}`} style={{ width: `${pct}%` }} />
                       </div>
 
@@ -282,8 +282,8 @@ export default function HabitsPage({ darkMode }: PageProps) {
                               <div key={dateLabel} className="flex flex-col items-center gap-1">
                                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${
                                   habit.week_data[i]
-                                    ? `${habit.color} text-white`
-                                    : darkMode ? 'bg-gray-800 text-gray-600' : 'bg-gray-100 text-gray-400'
+                                    ? `${habit.color} text-[#fffefb]`
+                                    : darkMode ? 'bg-[#3a3434] text-[#7a756c]' : 'bg-[#eceae3] text-[#939084]'
                                 }`}>
                                   {habit.week_data[i] ? '✓' : weekdayLabel}
                                 </div>
@@ -302,10 +302,10 @@ export default function HabitsPage({ darkMode }: PageProps) {
                     {/* Today check-in button */}
                     <button
                       onClick={() => handleLog(habit.id, habit.today_done)}
-                      className={`flex-shrink-0 w-12 h-12 rounded-xl border-2 flex items-center justify-center text-xl transition-all ${
+                      className={`flex-shrink-0 w-12 h-12 rounded-[8px] border-2 flex items-center justify-center text-xl transition-all ${
                         habit.today_done
                           ? `${habit.color} border-transparent`
-                          : darkMode ? 'border-gray-700 hover:border-gray-500' : 'border-gray-200 hover:border-gray-300'
+                          : darkMode ? 'border-[#4a4440] hover:border-[#939084]' : 'border-[#c5c0b1] hover:border-[#939084]'
                       }`}
                     >
                       {habit.today_done ? '✓' : habit.icon}

@@ -16,11 +16,11 @@ export default function GoalsPage({ darkMode }: PageProps) {
   const [goalType, setGoalType] = useState<Goal['goal_type']>('long')
   const [error, setError] = useState<string | null>(null)
 
-  const textH = darkMode ? 'text-white' : 'text-gray-900'
-  const subText = darkMode ? 'text-gray-500' : 'text-gray-400'
-  const cardBg = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
-  const inputBg = darkMode ? 'bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-700 placeholder-gray-400'
-  const hoverBg = darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
+  const textH = darkMode ? 'text-[#f0ebe3]' : 'text-[#201515]'
+  const subText = darkMode ? 'text-[#7a756c]' : 'text-[#939084]'
+  const cardBg = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
+  const inputBg = darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#c5c0b1] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'
+  const hoverBg = darkMode ? 'hover:bg-[#3a3434]' : 'hover:bg-[#eceae3]'
 
   const { data: goals, loading, refetch } = useApi(() => goalsApi.list())
   const longGoals = (goals ?? []).filter(goal => goal.goal_type === 'long')
@@ -77,7 +77,7 @@ export default function GoalsPage({ darkMode }: PageProps) {
     if (loading) {
       return (
         <div className="space-y-3">
-          {[1, 2].map(i => <div key={i} className={`h-14 rounded-lg animate-pulse ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`} />)}
+          {[1, 2].map(i => <div key={i} className={`h-14 rounded-[5px] animate-pulse ${darkMode ? 'bg-[#3a3434]' : 'bg-[#eceae3]'}`} />)}
         </div>
       )
     }
@@ -87,12 +87,12 @@ export default function GoalsPage({ darkMode }: PageProps) {
     }
 
     return (
-      <div className={`divide-y rounded-xl border ${darkMode ? 'divide-gray-800 border-gray-800' : 'divide-gray-50 border-gray-100'}`}>
+      <div className={`divide-y rounded-[5px] border ${darkMode ? 'divide-[#4a4440] border-[#4a4440]' : 'divide-[#c5c0b1] border-[#c5c0b1]'}`}>
         {items.map(goal => (
           <div key={goal.id} className={`flex items-center gap-3 px-4 py-4 transition-colors ${hoverBg}`}>
             <button onClick={() => toggleDone(goal)} className="flex-shrink-0">
               {goal.status === 'done'
-                ? <CheckCircle2 size={18} className="text-indigo-500" />
+                ? <CheckCircle2 size={18} className="text-[#ff4f00]" />
                 : <Circle size={18} className={subText} />
               }
             </button>
@@ -103,7 +103,7 @@ export default function GoalsPage({ darkMode }: PageProps) {
                 {goal.description ? ` · ${goal.description}` : ''}
               </div>
             </div>
-            <button onClick={() => removeGoal(goal)} className={`rounded-lg p-2 transition-colors ${darkMode ? 'text-gray-500 hover:bg-gray-800 hover:text-red-400' : 'text-gray-400 hover:bg-gray-50 hover:text-red-500'}`}>
+            <button onClick={() => removeGoal(goal)} className={`rounded-[5px] p-2 transition-colors ${darkMode ? 'text-[#7a756c] hover:bg-[#3a3434] hover:text-red-400' : 'text-[#939084] hover:bg-[#eceae3] hover:text-red-500'}`}>
               <Trash2 size={15} />
             </button>
           </div>
@@ -114,21 +114,21 @@ export default function GoalsPage({ darkMode }: PageProps) {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
-      <div className={`flex items-center justify-between rounded-xl border px-5 py-4 ${cardBg}`}>
+      <div className={`flex items-center justify-between rounded-[5px] border px-5 py-4 ${cardBg}`}>
         <h2 className={`text-sm font-semibold ${textH}`}>目标</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => startCreate('long')}
-            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors"
           >
             <Plus size={13} />添加长期目标
           </button>
           <button
             onClick={() => startCreate('short')}
-            className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs transition-colors ${
+            className={`flex items-center gap-1.5 rounded-[4px] border px-3 py-1.5 text-xs font-semibold transition-colors ${
               darkMode
-                ? 'border-gray-700 text-gray-300 hover:bg-gray-800'
-                : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+                ? 'border-[#4a4440] text-[#c5c0b1] hover:bg-[#3a3434]'
+                : 'border-[#c5c0b1] text-[#36342e] hover:bg-[#eceae3]'
             }`}
           >
             <Plus size={13} />添加短期目标
@@ -137,8 +137,8 @@ export default function GoalsPage({ darkMode }: PageProps) {
       </div>
 
       {isCreating && (
-        <form onSubmit={handleCreate} className={`grid grid-cols-2 gap-3 rounded-xl border p-5 ${cardBg}`}>
-          <div className={`col-span-2 flex rounded-lg border overflow-hidden ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+        <form onSubmit={handleCreate} className={`grid grid-cols-2 gap-3 rounded-[5px] border p-5 ${cardBg}`}>
+          <div className={`col-span-2 flex rounded-[5px] border overflow-hidden ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
             {([
               ['long', '长期目标'],
               ['short', '短期目标'],
@@ -149,8 +149,8 @@ export default function GoalsPage({ darkMode }: PageProps) {
                 onClick={() => setGoalType(type)}
                 className={`flex-1 px-3 py-2 text-xs transition-colors ${
                   goalType === type
-                    ? 'bg-indigo-600 text-white'
-                    : darkMode ? 'text-gray-400 hover:bg-gray-800' : 'text-gray-500 hover:bg-gray-50'
+                    ? 'bg-[#ff4f00] text-[#fffefb]'
+                    : darkMode ? 'text-[#939084] hover:bg-[#3a3434]' : 'text-[#36342e] hover:bg-[#eceae3]'
                 }`}
               >
                 {label}
@@ -162,34 +162,34 @@ export default function GoalsPage({ darkMode }: PageProps) {
             value={title}
             onChange={event => setTitle(event.target.value)}
             placeholder="目标名称"
-            className={`col-span-2 rounded-lg border px-3 py-2 text-sm outline-none ${inputBg}`}
+            className={`col-span-2 rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${inputBg}`}
           />
           <input
             type="date"
             value={targetDate}
             onChange={event => setTargetDate(event.target.value)}
-            className={`rounded-lg border px-3 py-2 text-sm outline-none ${inputBg}`}
+            className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${inputBg}`}
           />
           <input
             value={description}
             onChange={event => setDescription(event.target.value)}
             placeholder="备注（可选）"
-            className={`rounded-lg border px-3 py-2 text-sm outline-none ${inputBg}`}
+            className={`rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${inputBg}`}
           />
           {error && <div className="col-span-2 text-xs text-red-500">{error}</div>}
           <div className="col-span-2 flex gap-2">
-            <button type="submit" disabled={!title.trim()} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs text-white disabled:opacity-50">保存</button>
-            <button type="button" onClick={() => setIsCreating(false)} className={`rounded-lg border px-3 py-1.5 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>取消</button>
+            <button type="submit" disabled={!title.trim()} className="rounded-[4px] bg-[#ff4f00] px-3 py-1.5 text-xs text-[#fffefb] font-semibold disabled:opacity-50">保存</button>
+            <button type="button" onClick={() => setIsCreating(false)} className={`rounded-[4px] border px-3 py-1.5 text-xs font-semibold ${darkMode ? 'border-[#4a4440] text-[#939084]' : 'border-[#c5c0b1] text-[#36342e]'}`}>取消</button>
           </div>
         </form>
       )}
 
-      <section className={`rounded-xl border p-5 ${cardBg}`}>
+      <section className={`rounded-[5px] border p-5 ${cardBg}`}>
         <h3 className={`mb-3 text-sm font-semibold ${textH}`}>长期目标</h3>
         {renderGoalList(longGoals, '还没有长期目标')}
       </section>
 
-      <section className={`rounded-xl border p-5 ${cardBg}`}>
+      <section className={`rounded-[5px] border p-5 ${cardBg}`}>
         <h3 className={`mb-3 text-sm font-semibold ${textH}`}>短期目标</h3>
         {renderGoalList(shortGoals, '还没有短期目标')}
       </section>

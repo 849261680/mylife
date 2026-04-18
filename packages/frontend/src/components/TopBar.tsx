@@ -40,11 +40,11 @@ export default function TopBar({ activePage, darkMode, onToggleDark, onNavigate,
   const [searchQ, setSearchQ] = useState('')
   const [showNotifications, setShowNotifications] = useState(false)
 
-  const border = darkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-200 bg-white'
-  const text = darkMode ? 'text-gray-300' : 'text-gray-600'
-  const textH = darkMode ? 'text-white' : 'text-gray-900'
-  const inputBg = darkMode ? 'bg-gray-800 border-gray-700 text-gray-300 placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-700 placeholder-gray-400'
-  const btnHover = darkMode ? 'hover:bg-gray-800 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
+  const border = darkMode ? 'border-[#4a4440] bg-[#2a2424]' : 'border-[#c5c0b1] bg-[#fffefb]'
+  const textH = darkMode ? 'text-[#f0ebe3]' : 'text-[#201515]'
+  const text = darkMode ? 'text-[#939084]' : 'text-[#36342e]'
+  const inputBg = darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#c5c0b1] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'
+  const btnHover = darkMode ? 'hover:bg-[#3a3434] text-[#7a756c] hover:text-[#f0ebe3]' : 'hover:bg-[#eceae3] text-[#939084] hover:text-[#201515]'
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -83,13 +83,13 @@ export default function TopBar({ activePage, darkMode, onToggleDark, onNavigate,
       {/* Center: search */}
       <div className="w-64">
         <form onSubmit={handleSearch} className="relative">
-          <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+          <Search size={14} className={`absolute left-3 top-1/2 -translate-y-1/2 ${darkMode ? 'text-[#7a756c]' : 'text-[#939084]'}`} />
           <input
             type="text"
             placeholder="搜索任务、笔记..."
             value={searchQ}
             onChange={event => setSearchQ(event.target.value)}
-            className={`w-full pl-8 pr-3 py-1.5 text-sm rounded-lg border outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors ${inputBg}`}
+            className={`w-full pl-8 pr-3 py-1.5 text-sm rounded-[5px] border outline-none focus:border-[#ff4f00] focus:ring-1 focus:ring-[#ff4f00]/30 transition-colors ${inputBg}`}
           />
         </form>
       </div>
@@ -98,27 +98,27 @@ export default function TopBar({ activePage, darkMode, onToggleDark, onNavigate,
       <div className="flex items-center gap-1">
         <button
           onClick={() => setShowNotifications(v => !v)}
-          className={`relative p-2 rounded-lg transition-colors ${btnHover}`}
+          className={`relative p-2 rounded-[5px] transition-colors ${btnHover}`}
         >
           <Bell size={17} />
-          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-indigo-500 rounded-full" />
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#ff4f00] rounded-full" />
         </button>
         <button
           onClick={onToggleDark}
-          className={`p-2 rounded-lg transition-colors ${btnHover}`}
+          className={`p-2 rounded-[5px] transition-colors ${btnHover}`}
         >
           {darkMode ? <Sun size={17} /> : <Moon size={17} />}
         </button>
         <button
           onClick={handleNew}
-          className="ml-1 flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-3 py-1.5 rounded-lg transition-colors"
+          className="ml-1 flex items-center gap-1.5 bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] text-sm font-semibold px-3 py-1.5 rounded-[4px] transition-colors"
         >
           <Plus size={15} />
           <span>新建</span>
         </button>
       </div>
       {showNotifications && (
-        <div className={`absolute right-24 top-14 z-20 w-64 rounded-lg border p-3 text-sm shadow-lg ${darkMode ? 'border-gray-800 bg-gray-900 text-gray-300' : 'border-gray-100 bg-white text-gray-600'}`}>
+        <div className={`absolute right-24 top-14 z-20 w-64 rounded-[5px] border p-3 text-sm ${darkMode ? 'border-[#4a4440] bg-[#2a2424] text-[#c5c0b1]' : 'border-[#c5c0b1] bg-[#fffefb] text-[#36342e]'}`}>
           <div className={`font-medium ${textH}`}>通知</div>
           <div className={`mt-2 text-xs ${text}`}>暂无新通知</div>
         </div>

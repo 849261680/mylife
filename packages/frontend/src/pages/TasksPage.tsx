@@ -10,8 +10,8 @@ type StatusFilter = 'all' | 'todo' | 'in_progress' | 'done'
 
 interface PriorityConfig { label: string; dot: string }
 const priorityConfig: Record<Priority, PriorityConfig> = {
-  high:   { label: '高', dot: 'bg-red-400' },
-  low:    { label: '低', dot: 'bg-blue-400' },
+  high:   { label: '高', dot: 'bg-[#ff4f00]' },
+  low:    { label: '低', dot: 'bg-[#939084]' },
 }
 
 interface PageProps {
@@ -33,14 +33,13 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
   const [showFilters, setShowFilters] = useState(false)
   const [searchQ, setSearchQ] = useState('')
 
-  const textH    = darkMode ? 'text-white'     : 'text-gray-900'
-  const subText  = darkMode ? 'text-gray-500'  : 'text-gray-400'
-  const text     = darkMode ? 'text-gray-300'  : 'text-gray-600'
-  const cardBg   = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
-  const hoverBg  = darkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
-  const sidebarBg = darkMode ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100 shadow-sm'
-  const activeBg = darkMode ? 'bg-gray-800 text-white' : 'bg-indigo-50 text-indigo-600'
-  const divider  = darkMode ? 'divide-gray-800' : 'divide-gray-50'
+  const textH    = darkMode ? 'text-[#f0ebe3]'     : 'text-[#201515]'
+  const subText  = darkMode ? 'text-[#7a756c]'  : 'text-[#939084]'
+  const text     = darkMode ? 'text-[#c5c0b1]'  : 'text-[#36342e]'
+  const cardBg   = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
+  const hoverBg  = darkMode ? 'hover:bg-[#3a3434]' : 'hover:bg-[#eceae3]'
+  const sidebarBg = darkMode ? 'bg-[#2a2424] border-[#4a4440]' : 'bg-[#fffefb] border-[#c5c0b1]'
+  const divider  = darkMode ? 'divide-[#4a4440]' : 'divide-[#c5c0b1]'
 
   const { data: tasks, loading, refetch } = useApi(() => tasksApi.list())
   const { data: projects, refetch: refetchProjects } = useApi(() => projectsApi.list())
@@ -131,12 +130,13 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
   return (
     <div className="flex gap-5 max-w-6xl mx-auto">
       {/* Sidebar */}
-      <div className={`w-48 flex-shrink-0 rounded-xl border p-3 h-fit ${sidebarBg}`}>
+      <div className={`w-48 flex-shrink-0 rounded-[5px] border p-3 h-fit ${sidebarBg}`}>
         <div className="space-y-0.5">
           <button onClick={() => setActiveProject('all')}
-            className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-              activeProject === 'all' ? activeBg : `${text} ${hoverBg}`
+            className={`w-full flex items-center justify-between px-3 py-2 rounded-[5px] text-sm transition-all ${
+              activeProject === 'all' ? 'text-[#ff4f00] font-semibold' : `${text} ${hoverBg}`
             }`}
+            style={activeProject === 'all' ? { boxShadow: 'rgb(255, 79, 0) 0px -4px 0px 0px inset' } : undefined}
           >
             <div className="flex items-center gap-2">
               <FolderOpen size={13} /><span>所有任务</span>
@@ -147,9 +147,10 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
             <button
               key={project.id}
               onClick={() => setActiveProject(project.id)}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                activeProject === project.id ? activeBg : `${text} ${hoverBg}`
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-[5px] text-sm transition-all ${
+                activeProject === project.id ? 'text-[#ff4f00] font-semibold' : `${text} ${hoverBg}`
               }`}
+              style={activeProject === project.id ? { boxShadow: 'rgb(255, 79, 0) 0px -4px 0px 0px inset' } : undefined}
             >
               <div className="flex items-center gap-2 min-w-0">
                 <FolderOpen size={13} />
@@ -161,7 +162,7 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
             </button>
           ))}
         </div>
-        <div className={`mt-3 pt-3 border-t ${darkMode ? 'border-gray-800' : 'border-gray-100'}`}>
+        <div className={`mt-3 pt-3 border-t ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
           {isCreatingProject ? (
             <form onSubmit={submitNewProject} className="space-y-2">
               <input
@@ -169,20 +170,20 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
                 value={newProjectName}
                 onChange={event => setNewProjectName(event.target.value)}
                 placeholder="项目名称"
-                className={`w-full rounded-lg border px-2 py-1.5 text-xs outline-none ${
-                  darkMode ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400'
+                className={`w-full rounded-[5px] border px-2 py-1.5 text-xs outline-none focus:border-[#ff4f00] ${
+                  darkMode ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]' : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'
                 }`}
               />
               {projectError && <div className="text-xs text-red-500">{projectError}</div>}
               <div className="flex gap-2">
-                <button type="submit" className="rounded-lg bg-indigo-600 px-2 py-1 text-xs text-white">保存</button>
-                <button type="button" onClick={() => setIsCreatingProject(false)} className={`rounded-lg border px-2 py-1 text-xs ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-200 text-gray-500'}`}>取消</button>
+                <button type="submit" className="rounded-[4px] bg-[#ff4f00] px-2 py-1 text-xs text-[#fffefb] font-semibold">保存</button>
+                <button type="button" onClick={() => setIsCreatingProject(false)} className={`rounded-[4px] border px-2 py-1 text-xs ${darkMode ? 'border-[#4a4440] text-[#939084]' : 'border-[#c5c0b1] text-[#36342e]'}`}>取消</button>
               </div>
             </form>
           ) : (
             <button
               onClick={() => { setIsCreatingProject(true); setProjectError(null) }}
-              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-indigo-500 transition-colors ${darkMode ? 'hover:bg-indigo-900/20' : 'hover:bg-indigo-50'}`}
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-[5px] text-sm text-[#ff4f00] transition-colors ${darkMode ? 'hover:bg-[#3a2820]' : 'hover:bg-[#eceae3]'}`}
             >
               <Plus size={14} /><span>新建项目</span>
             </button>
@@ -195,13 +196,13 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h2 className={`text-sm font-semibold ${textH}`}>所有任务</h2>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${darkMode ? 'bg-gray-800 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${darkMode ? 'bg-[#3a3434] text-[#939084]' : 'bg-[#eceae3] text-[#939084]'}`}>
               {filtered.length} 项
             </span>
             {searchQ && (
               <button
                 onClick={() => setSearchQ('')}
-                className={`text-xs px-2 py-1 rounded-lg ${darkMode ? 'bg-gray-800 text-gray-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                className={`text-xs px-2 py-1 rounded-[5px] ${darkMode ? 'bg-[#3a3434] text-[#939084] hover:bg-[#4a4440]' : 'bg-[#eceae3] text-[#939084] hover:bg-[#c5c0b1]'}`}
               >
                 搜索：{searchQ} ×
               </button>
@@ -211,12 +212,12 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
             <div className="relative">
             <button
               onClick={() => setShowFilters(v => !v)}
-              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${darkMode ? 'border-gray-700 text-gray-400 hover:bg-gray-800' : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-[5px] border transition-colors ${darkMode ? 'border-[#4a4440] text-[#939084] hover:bg-[#3a3434]' : 'border-[#c5c0b1] text-[#36342e] hover:bg-[#eceae3]'}`}
             >
               <Filter size={12} />筛选
             </button>
             {showFilters && (
-              <div className={`absolute right-0 top-8 z-10 w-32 rounded-lg border p-1 shadow-lg ${darkMode ? 'border-gray-700 bg-gray-900' : 'border-gray-100 bg-white'}`}>
+              <div className={`absolute right-0 top-8 z-10 w-32 rounded-[5px] border p-1 ${darkMode ? 'border-[#4a4440] bg-[#2a2424]' : 'border-[#c5c0b1] bg-[#fffefb]'}`}>
                 {([
                   ['all', '全部'],
                   ['todo', '待办'],
@@ -226,7 +227,7 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
                   <button
                     key={status}
                     onClick={() => { setStatusFilter(status); setShowFilters(false) }}
-                    className={`w-full rounded-md px-2 py-1.5 text-left text-xs ${statusFilter === status ? activeBg : `${text} ${hoverBg}`}`}
+                    className={`w-full rounded-[4px] px-2 py-1.5 text-left text-xs ${statusFilter === status ? 'text-[#ff4f00] font-semibold' : `${text} ${hoverBg}`}`}
                   >
                     {label}
                   </button>
@@ -234,12 +235,12 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
               </div>
             )}
             </div>
-            <div className={`flex rounded-lg border overflow-hidden ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+            <div className={`flex rounded-[5px] border overflow-hidden ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
               {([['list', List], ['grid', LayoutGrid]] as [ViewMode, LucideIcon][]).map(([mode, Icon]) => (
                 <button key={mode} onClick={() => setViewMode(mode)}
                   className={`p-1.5 transition-colors ${viewMode === mode
-                    ? darkMode ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700'
-                    : darkMode ? 'text-gray-500 hover:bg-gray-800' : 'text-gray-400 hover:bg-gray-50'
+                    ? darkMode ? 'bg-[#3a3434] text-[#f0ebe3]' : 'bg-[#eceae3] text-[#201515]'
+                    : darkMode ? 'text-[#7a756c] hover:bg-[#3a3434]' : 'text-[#939084] hover:bg-[#eceae3]'
                   }`}
                 >
                   <Icon size={14} />
@@ -248,7 +249,7 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
             </div>
             <button
               onClick={startNewTask}
-              className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 bg-[#ff4f00] hover:bg-[#e64700] text-[#fffefb] text-xs font-semibold px-3 py-1.5 rounded-[4px] transition-colors"
             >
               <Plus size={13} />新建任务
             </button>
@@ -256,27 +257,27 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
         </div>
 
         {loading ? (
-          <div className={`rounded-xl border ${cardBg}`}>
+          <div className={`rounded-[5px] border ${cardBg}`}>
             {[1,2,3,4,5].map(i => (
-              <div key={i} className={`flex items-center gap-4 px-4 py-3 border-b last:border-0 ${darkMode ? 'border-gray-800' : 'border-gray-50'}`}>
-                <div className={`w-4 h-4 rounded-full animate-pulse ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`} />
-                <div className={`h-4 flex-1 rounded animate-pulse ${darkMode ? 'bg-gray-800' : 'bg-gray-100'}`} />
+              <div key={i} className={`flex items-center gap-4 px-4 py-3 border-b last:border-0 ${darkMode ? 'border-[#4a4440]' : 'border-[#c5c0b1]'}`}>
+                <div className={`w-4 h-4 rounded-full animate-pulse ${darkMode ? 'bg-[#4a4440]' : 'bg-[#c5c0b1]'}`} />
+                <div className={`h-4 flex-1 rounded-[4px] animate-pulse ${darkMode ? 'bg-[#3a3434]' : 'bg-[#eceae3]'}`} />
               </div>
             ))}
           </div>
         ) : (
-          <div className={`rounded-xl border ${viewMode === 'list' ? `divide-y ${divider}` : `p-3 grid grid-cols-2 gap-3 ${cardBg}` } ${viewMode === 'list' ? cardBg : ''}`}>
+          <div className={`rounded-[5px] border ${viewMode === 'list' ? `divide-y ${divider}` : `p-3 grid grid-cols-2 gap-3 ${cardBg}` } ${viewMode === 'list' ? cardBg : ''}`}>
             {isCreating && (
-              <form onSubmit={submitNewTask} className={`flex flex-col gap-3 px-4 py-3 ${darkMode ? 'bg-gray-900' : 'bg-white'} first:rounded-t-xl`}>
+              <form onSubmit={submitNewTask} className={`flex flex-col gap-3 px-4 py-3 ${darkMode ? 'bg-[#2a2424]' : 'bg-[#fffefb]'} first:rounded-t-[5px]`}>
                 <input
                   autoFocus
                   value={newTaskTitle}
                   onChange={event => setNewTaskTitle(event.target.value)}
                   placeholder="输入任务名称"
-                  className={`w-full rounded-lg border px-3 py-2 text-sm outline-none ${
+                  className={`w-full rounded-[5px] border px-3 py-2 text-sm outline-none focus:border-[#ff4f00] ${
                     darkMode
-                      ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-indigo-500'
-                      : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-indigo-500'
+                      ? 'bg-[#1e1a1a] border-[#4a4440] text-[#f0ebe3] placeholder-[#7a756c]'
+                      : 'bg-[#fffdf9] border-[#c5c0b1] text-[#201515] placeholder-[#939084]'
                   }`}
                 />
                 {createError && <div className="text-xs text-red-500">{createError}</div>}
@@ -284,15 +285,15 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
                   <button
                     type="submit"
                     disabled={creating || !newTaskTitle.trim()}
-                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-[4px] bg-[#ff4f00] px-3 py-1.5 text-xs text-[#fffefb] font-semibold transition-colors hover:bg-[#e64700] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {creating ? '保存中...' : '保存'}
                   </button>
                   <button
                     type="button"
                     onClick={cancelNewTask}
-                    className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
-                      darkMode ? 'border-gray-700 text-gray-400 hover:bg-gray-800' : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                    className={`rounded-[4px] border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                      darkMode ? 'border-[#4a4440] text-[#939084] hover:bg-[#3a3434]' : 'border-[#c5c0b1] text-[#36342e] hover:bg-[#eceae3]'
                     }`}
                   >
                     取消
@@ -307,10 +308,10 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
             ) : filtered.map(task => {
               const pc = priorityConfig[task.priority as Priority] ?? priorityConfig.low
               return (
-                <div key={task.id} className={`flex items-center gap-4 px-4 py-3 transition-colors ${hoverBg} ${viewMode === 'grid' ? `rounded-lg border ${darkMode ? 'border-gray-800 bg-gray-900' : 'border-gray-100 bg-white'}` : 'first:rounded-t-xl last:rounded-b-xl'}`}>
+                <div key={task.id} className={`flex items-center gap-4 px-4 py-3 transition-colors ${hoverBg} ${viewMode === 'grid' ? `rounded-[5px] border ${darkMode ? 'border-[#4a4440] bg-[#2a2424]' : 'border-[#c5c0b1] bg-[#fffefb]'}` : 'first:rounded-t-[5px] last:rounded-b-[5px]'}`}>
                   <button className="flex-shrink-0" onClick={() => toggleDone(task)}>
                     {task.status === 'done'
-                      ? <CheckCircle2 size={17} className="text-indigo-500" />
+                      ? <CheckCircle2 size={17} className="text-[#ff4f00]" />
                       : <Circle size={17} className={subText} />
                     }
                   </button>
@@ -320,7 +321,7 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
                         {task.title}
                       </span>
                       {task.tags.map(tag => (
-                        <span key={tag} className={`text-xs px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                        <span key={tag} className={`text-xs px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-[#3a3434] text-[#939084]' : 'bg-[#eceae3] text-[#939084]'}`}>
                           {tag}
                         </span>
                       ))}
@@ -339,7 +340,7 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
                     )}
                     <button
                       onClick={() => removeTask(task)}
-                      className={`rounded-lg p-1.5 transition-colors ${darkMode ? 'text-gray-500 hover:bg-gray-800 hover:text-red-400' : 'text-gray-400 hover:bg-gray-50 hover:text-red-500'}`}
+                      className={`rounded-[5px] p-1.5 transition-colors ${darkMode ? 'text-[#7a756c] hover:bg-[#3a3434] hover:text-red-400' : 'text-[#939084] hover:bg-[#eceae3] hover:text-red-500'}`}
                       aria-label={`删除${task.title}`}
                     >
                       <Trash2 size={14} />
@@ -348,10 +349,10 @@ export default function TasksPage({ darkMode, globalSearch = '' }: PageProps) {
                 </div>
               )
             })}
-            <div className={`px-4 py-3 last:rounded-b-xl ${hoverBg} transition-colors cursor-pointer`}>
+            <div className={`px-4 py-3 last:rounded-b-[5px] ${hoverBg} transition-colors cursor-pointer`}>
               <button
                 onClick={startNewTask}
-                className={`flex items-center gap-2 text-sm ${subText} hover:text-indigo-500 transition-colors`}
+                className={`flex items-center gap-2 text-sm ${subText} hover:text-[#ff4f00] transition-colors`}
               >
                 <Plus size={15} /><span>添加任务</span>
               </button>

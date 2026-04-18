@@ -42,7 +42,7 @@ export default function App() {
   const PageComponent = pages[activePage]
 
   return (
-    <div className={`flex h-screen overflow-hidden ${darkMode ? 'bg-gray-950' : 'bg-gray-50'}`}>
+    <div className={`flex h-screen overflow-hidden ${darkMode ? 'bg-[#1e1a1a]' : 'bg-[#fffefb]'}`}>
       <Sidebar
         activePage={activePage}
         onNavigate={setActivePage}
@@ -61,7 +61,7 @@ export default function App() {
             setActivePage(activePage === 'notes' ? 'notes' : 'tasks')
           }}
         />
-        <main className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-gray-950' : 'bg-gray-50'}`}>
+        <main className={`flex-1 overflow-y-auto p-6 ${darkMode ? 'bg-[#1e1a1a]' : 'bg-[#fffefb]'}`}>
           <PageComponent darkMode={darkMode} onNavigate={setActivePage} globalSearch={globalSearch} />
         </main>
       </div>
