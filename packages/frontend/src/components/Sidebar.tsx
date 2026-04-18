@@ -61,7 +61,7 @@ export default function Sidebar({ activePage, onNavigate, collapsed, onToggle, d
               <Zap size={14} className="text-[#fffefb]" />
             </div>
             <span className={`font-semibold text-sm truncate ${darkMode ? 'text-[#f0ebe3]' : 'text-[#201515]'}`}>
-              我的工作台
+              My Life
             </span>
           </div>
         )}
