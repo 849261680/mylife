@@ -289,7 +289,7 @@ export default function AgentPanel({ darkMode, compact = false, fillHeight = fal
                   }
                 }}
                 placeholder={compact ? '让今日助理整理安排、补任务或创建事件…' : '给 Agent 下达指令，比如：帮我创建一个明天 14:00 的事件，并整理今天的待办。'}
-                className={`${compact ? 'h-24' : 'h-28'} w-full resize-none rounded-[5px] border px-3 py-3 pr-28 text-sm outline-none focus:border-[#ff4f00] ${inputBg}`}
+                className={`${compact ? 'h-16' : 'h-20'} w-full resize-none rounded-[5px] border px-3 py-3 pr-28 text-sm outline-none focus:border-[#ff4f00] ${inputBg}`}
               />
               <button
                 type="submit"
