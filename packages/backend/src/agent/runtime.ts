@@ -80,8 +80,13 @@ function toResponseMessage(role: 'user' | 'assistant', text: string): OpenAI.Res
 }
 
 function buildInstructions(dashboardContext: unknown, systemPrompt = DEFAULT_AGENT_SYSTEM_PROMPT) {
+  const now = new Date()
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六']
+  const timeStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 周${weekdays[now.getDay()]} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
   return [
     systemPrompt,
+    '',
+    `当前时间：${timeStr}`,
     '',
     '长期记忆：',
     formatMemory(),
