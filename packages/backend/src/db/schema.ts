@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   id          TEXT PRIMARY KEY,
   project_id  TEXT REFERENCES projects(id) ON DELETE SET NULL,
   title       TEXT NOT NULL,
-  priority    TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','low')),
+  priority    TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','medium','low')),
   status      TEXT NOT NULL DEFAULT 'todo' CHECK(status IN ('todo','in_progress','done','cancelled')),
   due_date    TEXT,
   due_time    TEXT,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS task_subtasks (
   task_id     TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
   title       TEXT NOT NULL,
   done        INTEGER NOT NULL DEFAULT 0,
-  priority    TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','low')),
+  priority    TEXT NOT NULL DEFAULT 'low' CHECK(priority IN ('high','medium','low')),
   created_at  TEXT NOT NULL,
   updated_at  TEXT NOT NULL
 );
