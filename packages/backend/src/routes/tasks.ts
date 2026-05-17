@@ -9,7 +9,7 @@ const app = new Hono()
 
 const createTaskSchema = z.object({
   title: z.string().min(1),
-  priority: z.enum(['high', 'low']).default('low'),
+  priority: z.enum(['high', 'medium', 'low']).default('low'),
   due_date: z.string().nullable().default(null),
   due_time: z.string().nullable().default(null),
   tags: z.array(z.string()).default([]),
@@ -18,13 +18,13 @@ const createTaskSchema = z.object({
 
 const createSubtaskSchema = z.object({
   title: z.string().min(1),
-  priority: z.enum(['high', 'low']).default('low'),
+  priority: z.enum(['high', 'medium', 'low']).default('low'),
 })
 
 const updateSubtaskSchema = z.object({
   title: z.string().min(1).optional(),
   done: z.boolean().optional(),
-  priority: z.enum(['high', 'low']).optional(),
+  priority: z.enum(['high', 'medium', 'low']).optional(),
 })
 
 function parseSubtask(row: TaskSubtask & { done: number | boolean }): TaskSubtask {
@@ -32,7 +32,10 @@ function parseSubtask(row: TaskSubtask & { done: number | boolean }): TaskSubtas
 }
 
 function normalizeTaskPriority(priority: unknown): Task['priority'] {
-  return priority === 'high' ? 'high' : 'low'
+  if (priority === 'high' || priority === 'medium' || priority === 'low') {
+    return priority
+  }
+  return 'low'
 }
 
 function parseTask(row: Task & { tags: string | string[] }): Task {
