@@ -4,13 +4,14 @@ import type { Task } from '@mylife/shared'
 import { projectsApi, tasksApi } from '../lib/api'
 import { useApi } from '../lib/useApi'
 
-type Priority = 'high' | 'low'
+type Priority = 'high' | 'medium' | 'low'
 type ViewMode = 'list' | 'grid'
 type StatusFilter = 'all' | 'todo' | 'in_progress' | 'done'
 
 interface PriorityConfig { label: string; dot: string }
 const priorityConfig: Record<Priority, PriorityConfig> = {
   high:   { label: '高', dot: 'bg-[#ff4f00]' },
+  medium: { label: '中', dot: 'bg-[#f59e0b]' },
   low:    { label: '低', dot: 'bg-[#939084]' },
 }
 
