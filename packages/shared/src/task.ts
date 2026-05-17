@@ -1,4 +1,4 @@
-export type Priority = 'high' | 'low'
+export type Priority = 'high' | 'medium' | 'low'
 export type TaskStatus = 'todo' | 'in_progress' | 'done' | 'cancelled'
 
 export interface Project {
@@ -28,7 +28,7 @@ export interface TaskSubtask {
   task_id: string
   title: string
   done: boolean
-  priority: 'high' | 'low'
+  priority: Priority
   created_at: string
   updated_at: string
 }
